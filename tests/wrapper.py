@@ -3,7 +3,8 @@
 import numpy
 import unittest
 
-import logictensornetworks_wrapper as ltnw
+from ltn import logictensornetworks_wrapper as ltnw
+
 
 class TestBasics(unittest.TestCase):
     def setUp(self):

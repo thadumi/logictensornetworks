@@ -7,7 +7,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
 
-import logictensornetworks_wrapper as ltnw
+from ltn import logictensornetworks_wrapper as ltnw
 
 import spatial_relations_data
 

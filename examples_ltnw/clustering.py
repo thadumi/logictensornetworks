@@ -3,7 +3,8 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 
-import logictensornetworks_wrapper as ltnw
+from ltn import logictensornetworks_wrapper as ltnw
+
 ltnw.ltn.set_universal_aggreg("min")
 ltnw.ltn.set_existential_aggregator("max")
 ltnw.ltn.set_tnorm("prod")

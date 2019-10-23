@@ -4,8 +4,7 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 
-import logictensornetworks_wrapper as ltnw
-import logictensornetworks_library as ltnl
+from ltn import logictensornetworks_library as ltnl, logictensornetworks_wrapper as ltnw
 
 start=-1
 end=1

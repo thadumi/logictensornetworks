@@ -4,7 +4,7 @@ import logging; logging.basicConfig(level=logging.INFO)
 import numpy as np
 import matplotlib.pyplot as plt
 
-import logictensornetworks_wrapper as ltnw
+from ltn import logictensornetworks_wrapper as ltnw
 
 nr_samples=500
 

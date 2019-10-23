@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import logictensornetworks as ltn
-import logictensornetworks_library as ltnl
+from ltn import logictensornetworks_library as ltnl
 
 start=-1
 end=1

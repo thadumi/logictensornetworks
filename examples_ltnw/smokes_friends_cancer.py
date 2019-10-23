@@ -2,12 +2,11 @@
 import logging
 logger = logging.getLogger()
 logger.basicConfig = logging.basicConfig(level=logging.DEBUG)
-import logictensornetworks_wrapper as ltnw
+from ltn import logictensornetworks_wrapper as ltnw
 import tensorflow as tf
 import numpy as np
 import logictensornetworks as ltn
 import matplotlib.pyplot as plt
-from logictensornetworks import Not,And,Implies,Forall,Exists,Equiv
 import pandas as pd
 pd.options.display.max_rows = 999
 pd.options.display.max_columns = 999

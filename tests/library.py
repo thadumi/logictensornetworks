@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import numpy
 import unittest
 import tensorflow as tf
 
 import logictensornetworks as ltn
-import logictensornetworks_library as ltnl
+from ltn import logictensornetworks_library as ltnl
+
 
 class TestEqual(unittest.TestCase):
 
