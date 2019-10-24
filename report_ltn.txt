@@ -1,0 +1,104 @@
+TensorFlow 2.0 Upgrade Script
+-----------------------------
+Converted 4 files
+Detected 0 issues that require attention
+--------------------------------------------------------------------------------
+================================================================================
+Detailed log follows:
+
+================================================================================
+================================================================================
+Input tree: 'ltn/'
+================================================================================
+--------------------------------------------------------------------------------
+Processing file 'ltn/logictensornetworks_library.py'
+ outputting to 'ltn_v2/logictensornetworks_library.py'
+--------------------------------------------------------------------------------
+
+4:19: INFO: Added keywords to args of function 'tf.reduce_sum'
+9:20: INFO: Added keywords to args of function 'tf.reduce_sum'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'ltn/__init__.py'
+ outputting to 'ltn_v2/__init__.py'
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'ltn/logictensornetworks.py'
+ outputting to 'ltn_v2/logictensornetworks.py'
+--------------------------------------------------------------------------------
+
+21:19: INFO: Added keywords to args of function 'tf.reduce_min'
+24:19: INFO: Added keywords to args of function 'tf.reduce_max'
+27:30: INFO: Changed tf.to_float call to tf.cast(..., dtype=tf.float32).
+33:30: INFO: Changed tf.to_float call to tf.cast(..., dtype=tf.float32).
+37:19: INFO: Added keywords to args of function 'tf.reduce_prod'
+40:21: INFO: Added keywords to args of function 'tf.reduce_prod'
+43:27: INFO: Changed tf.to_float call to tf.cast(..., dtype=tf.float32).
+44:27: INFO: Changed tf.to_float call to tf.cast(..., dtype=tf.float32).
+45:19: INFO: Added keywords to args of function 'tf.cond'
+58:19: INFO: Added keywords to args of function 'tf.reduce_mean'
+61:19: INFO: Added keywords to args of function 'tf.reduce_max'
+74:34: INFO: Added keywords to args of function 'tf.reduce_sum'
+74:78: INFO: Changed tf.to_float call to tf.cast(..., dtype=tf.float32).
+74:90: INFO: Added keywords to args of function 'tf.shape'
+77:30: INFO: Added keywords to args of function 'tf.reduce_sum'
+93:21: INFO: Added keywords to args of function 'tf.reduce_mean'
+97:19: INFO: Added keywords to args of function 'tf.reduce_min'
+101:19: INFO: Added keywords to args of function 'tf.reduce_mean'
+109:19: INFO: Added keywords to args of function 'tf.reduce_max'
+166:29: INFO: Added keywords to args of function 'tf.reduce_prod'
+166:54: INFO: Added keywords to args of function 'tf.size'
+168:13: INFO: Added keywords to args of function 'tf.cond'
+177:29: INFO: Added keywords to args of function 'tf.reduce_prod'
+177:54: INFO: Added keywords to args of function 'tf.size'
+179:13: INFO: Added keywords to args of function 'tf.cond'
+185:17: INFO: Renamed 'tf.placeholder' to 'tf.compat.v1.placeholder'
+200:29: INFO: Renamed 'tf.random_uniform' to 'tf.random.uniform'
+216:16: INFO: Renamed 'tf.random_normal' to 'tf.random.normal'
+220:36: INFO: Added keywords to args of function 'tf.shape'
+234:51: INFO: Added keywords to args of function 'tf.shape'
+235:51: INFO: Added keywords to args of function 'tf.shape'
+252:17: INFO: Renamed keyword argument for tf.expand_dims from dim to axis
+252:61: INFO: Renamed 'tf.random_normal' to 'tf.random.normal'
+266:12: INFO: Renamed 'tf.matrix_band_part' to 'tf.linalg.band_part'
+268:16: INFO: Renamed 'tf.random_normal' to 'tf.random.normal'
+277:36: INFO: Added keywords to args of function 'tf.shape'
+280:61: INFO: Added keywords to args of function 'tf.transpose'
+295:51: INFO: Added keywords to args of function 'tf.shape'
+299:37: INFO: Added keywords to args of function 'tf.reduce_mean'
+310:30: INFO: Added keywords to args of function 'tf.reduce_prod'
+310:45: INFO: Added keywords to args of function 'tf.shape'
+311:30: INFO: Added keywords to args of function 'tf.shape'
+312:40: INFO: Added keywords to args of function 'tf.shape'
+335:9: INFO: Added keywords to args of function 'tf.transpose'
+339:34: INFO: Renamed 'tf.floor_div' to 'tf.math.floordiv'
+339:47: INFO: Added keywords to args of function 'tf.shape'
+339:63: INFO: Added keywords to args of function 'tf.shape'
+340:34: INFO: Renamed 'tf.floor_div' to 'tf.math.floordiv'
+340:47: INFO: Added keywords to args of function 'tf.shape'
+340:63: INFO: Added keywords to args of function 'tf.shape'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'ltn/logictensornetworks_wrapper.py'
+ outputting to 'ltn_v2/logictensornetworks_wrapper.py'
+--------------------------------------------------------------------------------
+
+293:7: INFO: Renamed 'tf.global_variables' to 'tf.compat.v1.global_variables'
+295:19: INFO: Renamed 'tf.global_variables_initializer' to 'tf.compat.v1.global_variables_initializer'
+297:85: INFO: Renamed 'tf.report_uninitialized_variables' to 'tf.compat.v1.report_uninitialized_variables'
+298:52: INFO: Renamed 'tf.global_variables' to 'tf.compat.v1.global_variables'
+299:17: INFO: Renamed 'tf.variables_initializer' to 'tf.compat.v1.variables_initializer'
+312:14: INFO: Renamed 'tf.InteractiveSession' to 'tf.compat.v1.InteractiveSession'
+316:34: INFO: Added keywords to args of function 'tf.reduce_mean'
+333:7: INFO: Renamed 'tf.global_variables' to 'tf.compat.v1.global_variables'
+336:33: INFO: Renamed 'tf.train.GradientDescentOptimizer' to 'tf.compat.v1.train.GradientDescentOptimizer'
+342:15: INFO: Renamed 'tf.global_variables_initializer' to 'tf.compat.v1.global_variables_initializer'
+364:7: INFO: Renamed 'tf.global_variables' to 'tf.compat.v1.global_variables'
+--------------------------------------------------------------------------------
+

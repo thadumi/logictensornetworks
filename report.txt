@@ -1,0 +1,113 @@
+TensorFlow 2.0 Upgrade Script
+-----------------------------
+Converted 7 files
+Detected 0 issues that require attention
+--------------------------------------------------------------------------------
+================================================================================
+Detailed log follows:
+
+================================================================================
+================================================================================
+Input tree: 'examples_ltn/'
+================================================================================
+--------------------------------------------------------------------------------
+Processing file 'examples_ltn/multilabel_classifier_simple.py'
+ outputting to 'examples_ltn_v2/multilabel_classifier_simple.py'
+--------------------------------------------------------------------------------
+
+25:7: INFO: Renamed 'tf.Session' to 'tf.compat.v1.Session'
+26:7: INFO: Renamed 'tf.global_variables_initializer' to 'tf.compat.v1.global_variables_initializer'
+28:6: INFO: Renamed 'tf.train.GradientDescentOptimizer' to 'tf.compat.v1.train.GradientDescentOptimizer'
+49:17: INFO: Added keywords to args of function 'tf.transpose'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'examples_ltn/smokes_friends_cancer.py'
+ outputting to 'examples_ltn_v2/smokes_friends_cancer.py'
+--------------------------------------------------------------------------------
+
+68:11: INFO: Added keywords to args of function 'tf.reduce_mean'
+69:6: INFO: Renamed 'tf.train.RMSPropOptimizer' to 'tf.compat.v1.train.RMSPropOptimizer'
+72:5: INFO: Renamed 'tf.Session' to 'tf.compat.v1.Session'
+73:17: INFO: Renamed 'tf.global_variables_initializer' to 'tf.compat.v1.global_variables_initializer'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'examples_ltn/spatial_relations.py'
+ outputting to 'examples_ltn_v2/spatial_relations.py'
+--------------------------------------------------------------------------------
+
+203:8: INFO: Added keywords to args of function 'tf.reduce_min'
+204:6: INFO: Renamed 'tf.train.AdamOptimizer' to 'tf.compat.v1.train.AdamOptimizer'
+205:7: INFO: Renamed 'tf.global_variables_initializer' to 'tf.compat.v1.global_variables_initializer'
+227:5: INFO: Renamed 'tf.Session' to 'tf.compat.v1.Session'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'examples_ltn/propositional_variables.py'
+ outputting to 'examples_ltn_v2/propositional_variables.py'
+--------------------------------------------------------------------------------
+
+18:6: INFO: Renamed 'tf.train.GradientDescentOptimizer' to 'tf.compat.v1.train.GradientDescentOptimizer'
+19:5: INFO: Renamed 'tf.Session' to 'tf.compat.v1.Session'
+20:13: INFO: Renamed 'tf.global_variables_initializer' to 'tf.compat.v1.global_variables_initializer'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'examples_ltn/semantic_mnist_pairs.py'
+ outputting to 'examples_ltn_v2/semantic_mnist_pairs.py'
+--------------------------------------------------------------------------------
+
+42:14: INFO: Renamed 'tf.truncated_normal' to 'tf.random.truncated_normal'
+50:11: INFO: Added keywords to args of function 'tf.nn.conv2d'
+50:11: INFO: Renamed keyword argument for tf.nn.conv2d from filter to filters
+53:11: INFO: Added keywords to args of function 'tf.nn.max_pool'
+53:11: INFO: Renamed keyword argument for tf.nn.max_pool from value to input
+53:11: INFO: Renamed 'tf.nn.max_pool' to 'tf.nn.max_pool2d'
+56:4: INFO: Renamed 'tf.placeholder' to 'tf.compat.v1.placeholder'
+57:5: INFO: Renamed 'tf.placeholder' to 'tf.compat.v1.placeholder'
+79:12: INFO: Renamed 'tf.placeholder' to 'tf.compat.v1.placeholder'
+80:13: INFO: Changing keep_prob arg of tf.nn.dropout to rate, and recomputing value.
+
+90:16: INFO: Added keywords to args of function 'tf.reduce_mean'
+91:4: INFO: Renamed 'tf.nn.softmax_cross_entropy_with_logits_v2' to 'tf.nn.softmax_cross_entropy_with_logits'
+95:4: INFO: Added keywords to args of function 'tf.argmax'
+96:4: INFO: Added keywords to args of function 'tf.argmax'
+97:11: INFO: Added keywords to args of function 'tf.reduce_mean'
+119:30: INFO: Renamed 'tf.where' to 'tf.compat.v1.where'
+124:30: INFO: Renamed 'tf.where' to 'tf.compat.v1.where'
+129:30: INFO: Renamed 'tf.where' to 'tf.compat.v1.where'
+158:13: INFO: Added keywords to args of function 'tf.reduce_min'
+159:17: INFO: Added keywords to args of function 'tf.reduce_mean'
+160:14: INFO: Added keywords to args of function 'tf.reduce_mean'
+161:16: INFO: Added keywords to args of function 'tf.reduce_mean'
+162:13: INFO: Added keywords to args of function 'tf.reduce_mean'
+165:25: INFO: Renamed 'tf.train.AdamOptimizer' to 'tf.compat.v1.train.AdamOptimizer'
+166:28: INFO: Renamed 'tf.train.AdamOptimizer' to 'tf.compat.v1.train.AdamOptimizer'
+167:20: INFO: Renamed 'tf.train.AdamOptimizer' to 'tf.compat.v1.train.AdamOptimizer'
+169:7: INFO: Renamed 'tf.global_variables_initializer' to 'tf.compat.v1.global_variables_initializer'
+183:5: INFO: Renamed 'tf.Session' to 'tf.compat.v1.Session'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'examples_ltn/regression_linear.py'
+ outputting to 'examples_ltn_v2/regression_linear.py'
+--------------------------------------------------------------------------------
+
+34:6: INFO: Added keywords to args of function 'tf.reduce_mean'
+36:5: INFO: Renamed 'tf.Session' to 'tf.compat.v1.Session'
+37:6: INFO: Renamed 'tf.train.GradientDescentOptimizer' to 'tf.compat.v1.train.GradientDescentOptimizer'
+39:7: INFO: Renamed 'tf.global_variables_initializer' to 'tf.compat.v1.global_variables_initializer'
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Processing file 'examples_ltn/clustering.py'
+ outputting to 'examples_ltn_v2/clustering.py'
+--------------------------------------------------------------------------------
+
+76:4: INFO: Added keywords to args of function 'tf.reduce_mean'
+88:6: INFO: Renamed 'tf.train.RMSPropOptimizer' to 'tf.compat.v1.train.RMSPropOptimizer'
+89:7: INFO: Renamed 'tf.global_variables_initializer' to 'tf.compat.v1.global_variables_initializer'
+93:7: INFO: Renamed 'tf.Session' to 'tf.compat.v1.Session'
+--------------------------------------------------------------------------------
+
