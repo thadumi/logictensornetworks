@@ -1,6 +1,6 @@
 """
 :Date: Oct 24, 2019
-:Version: 0.0.1
+:Version: 0.0.2
 """
 import tensorflow as tf
 
@@ -140,19 +140,16 @@ def Exists(vars, wff):
     return result
 
 
-@tf.function
-def variable(placeholder, label, number_of_features_or_feed):
-    if type(number_of_features_or_feed) is int:
-        result = tf.placeholder(dtype=tf.float32, shape=(None, number_of_features_or_feed), name=label)
-    elif isinstance(number_of_features_or_feed, tf.Tensor):
-        result = tf.identity(number_of_features_or_feed, name=label)
+def variable(feed, label='variable'):
+    if isinstance(feed, tf.Tensor):
+        result = tf.identity(feed, name=label)
     else:
-        result = tf.constant(number_of_features_or_feed, name=label)
+        result = tf.constant(feed, name=label)
     result.doms = [label]
     return result
 
 
-def constant(value=None, min_value=None, max_value=None):
+def constant(value=None, min_value=None, max_value=None, label='constant'):
     """
     Create a constant
 
@@ -162,15 +159,17 @@ def constant(value=None, min_value=None, max_value=None):
     :param value: the value of a constant which is effectively a constant
     :param min_value: todo
     :param max_value: todo
+    :param label: todo
     :return:  a tensor which is a constant iff value was set otherwise a tensorflow.Variable
     """
     if value is not None:
-        result = tf.constant(value)
+        result = tf.constant(value, name=label)
     else:
-        result = tf.Variable(tf.random_uniform(
+        result = tf.Variable(tf.random.uniform(
             shape=(1, len(min_value)),
             minval=min_value,
-            maxval=max_value))
+            maxval=max_value),
+            name=label)
     result.doms = []
     return result
 
