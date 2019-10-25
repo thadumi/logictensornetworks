@@ -41,7 +41,7 @@ def set_universal_aggregator(aggregator_kind: str):
 
 def set_existential_aggregator(aggregator_kind: str):
     global F_Exists
-    assert aggregator_kind in TRIANGULAR_NORMS['universal'].keys()
+    assert aggregator_kind in TRIANGULAR_NORMS['existence'].keys()
 
     F_Exists = TRIANGULAR_NORMS['existence'][aggregator_kind]
 
@@ -182,8 +182,62 @@ def proposition(label, initial_value=None, value=None):
     pass
 
 
-def predicate(label, number_of_features_or_vars, pred_definition=None, layers=None):
-    pass
+def predicate(number_of_features_or_vars, pred_definition=None, layers=None, label='predicate'):
+    layers = layers or 4
+    global BIAS
+
+    if type(number_of_features_or_vars) is list:  # list of vars I suppose
+        number_of_features = sum([int(v.shape[1]) for v in number_of_features_or_vars])
+    elif type(number_of_features_or_vars) is tf.Tensor:
+        number_of_features = int(number_of_features_or_vars.shape[1])
+    else:
+        number_of_features = number_of_features_or_vars
+    if pred_definition is None:
+        # if there is not a custom predicate model defined create create the default schema
+        W = tf.linalg.band_part(
+            tf.Variable(
+                tf.random.normal(
+                    [layers,
+                     number_of_features + 1,
+                     number_of_features + 1], mean=0, stddev=1), name="W" + label), 0, -1)
+        u = tf.Variable(tf.ones([layers, 1]),
+                        name="u" + label)
+
+        def apply_pred(*args):
+            app_label = (label + "/" + "_".join([arg.name.split(":")[0] for arg in args]) + "/") \
+                if not tf.executing_eagerly() else (label + '_applied_pred')
+
+            tensor_args = tf.concat(args, axis=1)
+            X = tf.concat([tf.ones((tf.shape(tensor_args)[0], 1)),
+                           tensor_args], 1)
+            XW = tf.matmul(tf.tile(tf.expand_dims(X, 0), [layers, 1, 1]), W)
+            XWX = tf.squeeze(tf.matmul(tf.expand_dims(X, 1), tf.transpose(XW, [1, 2, 0])), axis=[1])
+            gX = tf.matmul(tf.tanh(XWX), u)
+            result = tf.sigmoid(gX, name=app_label)
+            return result
+
+        pars = [W, u]
+    else:
+        def apply_pred(*args):
+            return pred_definition(*args)
+
+        pars = []
+
+    def pred(*args):
+        global BIAS
+        crossed_args, list_of_args_in_crossed_args = cross_args(args)
+        result = apply_pred(*list_of_args_in_crossed_args)
+        if crossed_args.doms != []:
+            result = tf.reshape(result, tf.concat([tf.shape(crossed_args)[:-1], [1]], axis=0))
+        else:
+            result = tf.reshape(result, (1,))
+        result.doms = crossed_args.doms
+        BIAS = tf.divide(BIAS + .5 - tf.reduce_mean(result), 2) * BIAS_factor
+        return result
+
+    pred.pars = pars
+    pred.label = label
+    return pred
 
 
 def cross_args(args):
@@ -246,5 +300,5 @@ def cross_2args(X, Y):
 
 '''DEFAULTS'''
 set_tnorm("luk")
-set_universal_aggregator("hmean")
-set_existential_aggregator("max")
+set_universal_aggregator('hmean')
+set_existential_aggregator('max')
