@@ -1,6 +1,6 @@
 """
 :Date: Oct 24, 2019
-:Version: 0.0.2
+:Version: 0.0.3
 """
 import tensorflow as tf
 
@@ -64,7 +64,7 @@ def Or(*wffs):
         result.doms = []
     else:
         cross_wffs, _ = cross_args(wffs)
-        label = "_OR_".join([wff.name.split(':')[0] for wff in wffs])
+        label = "_OR_".join([wff.name.split(':')[0] for wff in wffs]) if not tf.executing_eagerly() else '_OR_'
         result = tf.identity(F_Or(cross_wffs), name=label)
         result.doms = cross_wffs.doms
 
@@ -74,7 +74,7 @@ def Or(*wffs):
 def Implies(wff1, wff2):
     _, cross_wffs = cross_2args(wff1, wff2)
 
-    label = wff1.name.split(":")[0] + "_IMP_" + wff2.name.split(":")[0]
+    label = wff1.name.split(":")[0] + "_IMP_" + wff2.name.split(":")[0] if not tf.executing_eagerly() else '_IMP_'
     result = F_Implies(cross_wffs[0], cross_wffs[1])
     result = tf.identity(result, name=label)
     result.doms = cross_wffs[0].doms
@@ -83,7 +83,7 @@ def Implies(wff1, wff2):
 
 def Not(wff):
     result = F_Not(wff)
-    label = "NOT_" + wff.name.split(":")[0]
+    label = "NOT_" + wff.name.split(":")[0] if not tf.executing_eagerly() else 'NOT_'
     result = tf.identity(result, name=label)
     result.doms = wff.doms
     return result
@@ -91,7 +91,7 @@ def Not(wff):
 
 def Equiv(wff1, wff2):
     _, cross_wffs = cross_2args(wff1, wff2)
-    label = wff1.name.split(":")[0] + "_IFF_" + wff2.name.split(":")[0]
+    label = wff1.name.split(":")[0] + "_IFF_" + wff2.name.split(":")[0] if not tf.executing_eagerly() else '_IFF_'
 
     result = F_Equiv(cross_wffs[0], cross_wffs[1])
     result = tf.identity(result, name=label)
@@ -99,8 +99,7 @@ def Equiv(wff1, wff2):
     return result
 
 
-@tf.function
-def Forall(wff, args):
+def Forall(args, wff):
     if type(args) is not tuple:
         args = (args,)
 
@@ -112,10 +111,12 @@ def Forall(wff, args):
 
     ones = tf.ones((1,) * (len(result_doms) + 1))
 
-    if not_empty_vars:
-        result = F_ForAll(wff, quantif_axis)
-    else:
-        result = ones
+    # if not_empty_vars:
+    #    result = F_ForAll(quantif_axis, wff)
+    # else:
+    #    result = ones
+
+    result = tf.cond(not_empty_vars, lambda: F_ForAll(quantif_axis, wff), lambda: ones)
     result.doms = result_doms
 
     return result
@@ -183,7 +184,7 @@ def proposition(label, initial_value=None, value=None):
 
 
 def predicate(number_of_features_or_vars, pred_definition=None, layers=None, label='predicate'):
-    layers = layers or 4
+    layers = layers or LAYERS
     global BIAS
 
     if type(number_of_features_or_vars) is list:  # list of vars I suppose

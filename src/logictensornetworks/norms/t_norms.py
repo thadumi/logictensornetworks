@@ -116,6 +116,7 @@ def prod_implies(wff1, wff2):
     else:
         return tf.constant([1.0])
 
+
 @tf.function
 def prod_not(wff):
     # according to standard goedel logic is
@@ -134,18 +135,18 @@ def prod_equivalent(wff1, wff2):
 
 '''########################## hmean norms ###################################'''
 
-@tf.function
-def hmean_universal_aggregation(wff, axis):
+
+def hmean_universal_aggregation(axis, wff):
     return 1 / tf.reduce_mean(1 / (wff + 1e-10), axis=axis)
 
 
-def min_universal_aggregation(wff, axis):
-    return tf.reduce_min(wff,axis=axis)
+def min_universal_aggregation(axis, wff):
+    return tf.reduce_min(wff, axis=axis)
 
 
-def mean_universal_aggregation(wff, axis):
+def mean_universal_aggregation(axis, wff):
     return tf.reduce_mean(wff, axis=axis)
 
 
-def max_existence_aggregation(wff, axis):
+def max_existence_aggregation(axis, wff):
     return tf.reduce_max(wff, axis=axis)
