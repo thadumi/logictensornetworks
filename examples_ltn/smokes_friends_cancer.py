@@ -1,13 +1,15 @@
 import tensorflow as tf
 import numpy as np
-import logictensornetworks as ltn
+import src.logictensornetworks.logictensornetworks as ltn
 import matplotlib.pyplot as plt
-from logictensornetworks import Not,And,Implies,Forall,Exists,Equiv
+from src.logictensornetworks.logictensornetworks import Not, And, Implies, Forall, Exists, Equiv
 import pandas as pd
+
 pd.options.display.max_rows = 999
 pd.options.display.max_columns = 999
 pd.set_option('display.width', 1000)
 pd.options.display.float_format = '{:,.2f}'.format
+
 
 def plt_heatmap(df):
     plt.pcolor(df)
@@ -16,59 +18,76 @@ def plt_heatmap(df):
     plt.colorbar()
 
 
-
-pd.set_option('precision',2)
+pd.set_option('precision', 2)
 
 ltn.LAYERS = 4
 ltn.BIAS_factor = 1e-7
-ltn.set_universal_aggreg("mean")
+ltn.set_universal_aggregator("mean")
 
 size = 20
-g1 = {l:ltn.constant(l,min_value=[0.]*size,max_value=[1.]*size) for l in 'abcdefgh'}
-g2 = {l:ltn.constant(l,min_value=[0.]*size,max_value=[1.]*size) for l in 'ijklmn'}
-g = {**g1,**g2}
+g1 = {l: ltn.constant(label=l, min_value=[0.] * size, max_value=[1.] * size) for l in 'abcdefgh'}
+g2 = {l: ltn.constant(label=l, min_value=[0.] * size, max_value=[1.] * size) for l in 'ijklmn'}
+g = {**g1, **g2}
+
+friends = [('a', 'b'), ('a', 'e'), ('a', 'f'), ('a', 'g'), ('b', 'c'), ('c', 'd'), ('e', 'f'), ('g', 'h'),
+           ('i', 'j'), ('j', 'm'), ('k', 'l'), ('m', 'n')]
+smokes = ['a', 'e', 'f', 'g', 'j', 'n']
+cancer = ['a', 'e']
+
+p = ltn.variable(tf.concat(list(g.values()), axis=0), label='p')
+
+q = ltn.variable(tf.concat(list(g.values()), axis=0), label='q')
+
+p1 = ltn.variable(tf.concat(list(g1.values()), axis=0), label='p1')
+
+q1 = ltn.variable(tf.concat(list(g1.values()), axis=0), label='q1')
+
+p2 = ltn.variable(tf.concat(list(g2.values()), axis=0), label='p2')
+
+q2 = ltn.variable(tf.concat(list(g2.values()), axis=0), label='q2')
+
+Friends = ltn.predicate(size * 2, label='Friends')
+Smokes = ltn.predicate(size, label='Smokes')
+Cancer = ltn.predicate(size, label='Cancer')
+
+facts = [Friends(g[x], g[y]) for (x, y) in friends] + \
+        [Not(Friends(g[x], g[y])) for x in g1 for y in g1
+         if (x, y) not in friends and x < y] + \
+        [Not(Friends(g[x], g[y])) for x in g2 for y in g2
+         if (x, y) not in friends and x < y] + \
+        [Smokes(g[x]) for x in smokes] + \
+        [Not(Smokes(g[x])) for x in g if x not in smokes] + \
+        [Cancer(g[x]) for x in cancer] + \
+        [Not(Cancer(g[x])) for x in g1 if x not in cancer] + \
+        [Forall(p, Not(Friends(p, p))),
+         Forall((p, q), Equiv(Friends(p, q), Friends(q, p))),
+         Equiv(Forall(p1, Implies(Smokes(p1), Cancer(p1))),
+               Forall(p2, Implies(Smokes(p2), Cancer(p2)))),
+         Equiv(Forall(p1, Implies(Cancer(p1), Smokes(p1))),
+               Forall(p2, Implies(Cancer(p2), Smokes(p2))))]
 
 
-friends = [('a','b'),('a','e'),('a','f'),('a','g'),('b','c'),('c','d'),('e','f'),('g','h'),
-           ('i','j'),('j','m'),('k','l'),('m','n')]
-smokes = ['a','e','f','g','j','n']
-cancer = ['a','e']
+variables = list(g.values())
+variables.append(Friends.pars[1])
+variables.append(Smokes.pars[1])
+variables.append(Cancer.pars[1])
 
+lossF = lambda: -(1.0 / tf.reduce_mean(1 / tf.concat(facts, axis=0))) + ltn.BIAS
 
-p = ltn.variable("p",tf.concat(list(g.values()),axis=0))
-q = ltn.variable("q",tf.concat(list(g.values()),axis=0))
+opt = tf.keras.optimizers.RMSprop(learning_rate=.01, decay=.9)
 
-p1 = ltn.variable("p1",tf.concat(list(g1.values()),axis=0))
-q1 = ltn.variable("q1",tf.concat(list(g1.values()),axis=0))
+with tf.GradientTape() as tape:
+    tape.watch(variables)
 
-p2 = ltn.variable("p2",tf.concat(list(g2.values()),axis=0))
-q2 = ltn.variable("q2",tf.concat(list(g2.values()),axis=0))
+    loss_value = lossF()
+    print(tape.watched_variables())
+grads = tape.gradient(loss_value, variables)
 
-Friends = ltn.predicate('Friends',size*2)
-Smokes = ltn.predicate('Smokes',size)
-Cancer = ltn.predicate('Cancer',size)
+#opt.apply_gradients(zip(grads, vars))
 
+# opt.minimize(lossF, var_list=variables)
 
-facts = [Friends(g[x],g[y]) for (x,y) in friends]+\
-        [Not(Friends(g[x],g[y])) for x in g1 for y in g1
-                                 if (x,y) not in friends and x < y]+\
-        [Not(Friends(g[x],g[y])) for x in g2 for y in g2
-                                 if (x, y) not in friends and x < y] +\
-        [Smokes(g[x]) for x in smokes]+\
-        [Not(Smokes(g[x])) for x in g if x not in smokes]+\
-        [Cancer(g[x]) for x in cancer]+\
-        [Not(Cancer(g[x])) for x in g1 if x not in cancer] +\
-        [Forall(p,Not(Friends(p,p))),
-         Forall((p,q),Equiv(Friends(p,q),Friends(q,p))),
-         Equiv(Forall(p1,Implies(Smokes(p1),Cancer(p1))),
-               Forall(p2,Implies(Smokes(p2),Cancer(p2)))),
-         Equiv(Forall(p1,Implies(Cancer(p1),Smokes(p1))),
-               Forall(p2,Implies(Cancer(p2),Smokes(p2))))]
-
-loss = 1.0/tf.reduce_mean(1/tf.concat(facts,axis=0))
-opt = tf.train.RMSPropOptimizer(learning_rate=.01,decay=.9)
-optimize = opt.minimize(-(loss+ltn.BIAS))
-
+''''
 with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         for i in range(10000):
@@ -109,5 +128,4 @@ with tf.Session() as sess:
                                         Forall(q,Implies(Friends(p,q),
                                                          Smokes(q)))))))
 
-
-
+'''

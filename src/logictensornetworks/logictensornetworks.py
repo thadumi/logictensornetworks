@@ -182,7 +182,6 @@ def function(label, input_shape_spec, output_shape_spec=1, fun_definition=None):
 def proposition(label, initial_value=None, value=None):
     pass
 
-
 def predicate(number_of_features_or_vars, pred_definition=None, layers=None, label='predicate'):
     layers = layers or LAYERS
     global BIAS
