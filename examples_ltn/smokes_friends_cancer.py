@@ -50,42 +50,96 @@ Friends = ltn.predicate(size * 2, label='Friends')
 Smokes = ltn.predicate(size, label='Smokes')
 Cancer = ltn.predicate(size, label='Cancer')
 
-facts = [Friends(g[x], g[y]) for (x, y) in friends] + \
-        [Not(Friends(g[x], g[y])) for x in g1 for y in g1
-         if (x, y) not in friends and x < y] + \
-        [Not(Friends(g[x], g[y])) for x in g2 for y in g2
-         if (x, y) not in friends and x < y] + \
-        [Smokes(g[x]) for x in smokes] + \
-        [Not(Smokes(g[x])) for x in g if x not in smokes] + \
-        [Cancer(g[x]) for x in cancer] + \
-        [Not(Cancer(g[x])) for x in g1 if x not in cancer] + \
-        [Forall(p, Not(Friends(p, p))),
-         Forall((p, q), Equiv(Friends(p, q), Friends(q, p))),
-         Equiv(Forall(p1, Implies(Smokes(p1), Cancer(p1))),
-               Forall(p2, Implies(Smokes(p2), Cancer(p2)))),
-         Equiv(Forall(p1, Implies(Cancer(p1), Smokes(p1))),
-               Forall(p2, Implies(Cancer(p2), Smokes(p2))))]
-
-
 variables = list(g.values())
 variables.append(Friends.pars[1])
 variables.append(Smokes.pars[1])
 variables.append(Cancer.pars[1])
 
-lossF = lambda: -(1.0 / tf.reduce_mean(1 / tf.concat(facts, axis=0))) + ltn.BIAS
 
-opt = tf.keras.optimizers.RMSprop(learning_rate=.01, decay=.9)
+def loss():
+    facts = [Friends(g[x], g[y]) for (x, y) in friends] + \
+            [Not(Friends(g[x], g[y])) for x in g1 for y in g1
+             if (x, y) not in friends and x < y] + \
+            [Not(Friends(g[x], g[y])) for x in g2 for y in g2
+             if (x, y) not in friends and x < y] + \
+            [Smokes(g[x]) for x in smokes] + \
+            [Not(Smokes(g[x])) for x in g if x not in smokes] + \
+            [Cancer(g[x]) for x in cancer] + \
+            [Not(Cancer(g[x])) for x in g1 if x not in cancer] + \
+            [Forall(p, Not(Friends(p, p))),
+             Forall((p, q), Equiv(Friends(p, q), Friends(q, p))),
+             Equiv(Forall(p1, Implies(Smokes(p1), Cancer(p1))),
+                   Forall(p2, Implies(Smokes(p2), Cancer(p2)))),
+             Equiv(Forall(p1, Implies(Cancer(p1), Smokes(p1))),
+                   Forall(p2, Implies(Cancer(p2), Smokes(p2))))]
 
-with tf.GradientTape() as tape:
-    tape.watch(variables)
+    loss = -(1.0 / tf.reduce_mean(1 / tf.concat(facts, axis=0))) + ltn.BIAS
 
-    loss_value = lossF()
-    print(tape.watched_variables())
-grads = tape.gradient(loss_value, variables)
+    return loss
 
-#opt.apply_gradients(zip(grads, vars))
 
-# opt.minimize(lossF, var_list=variables)
+# grads = tape.gradient(loss, variables)
+
+optimizer = tf.keras.optimizers.RMSprop(learning_rate=.01, decay=.9)
+# optimizer.minimize(loss, var_list=lambda: variables)
+
+# opt.apply_gradients(zip(grads, facts))
+
+
+# Iterate over the batches of the dataset.
+for step in range(10):
+
+    # Open a GradientTape to record the operations run
+    # during the forward pass, which enables autodifferentiation.
+    with tf.GradientTape() as tape:
+        facts = [Friends(g[x], g[y]) for (x, y) in friends] + \
+                [Not(Friends(g[x], g[y])) for x in g1 for y in g1
+                 if (x, y) not in friends and x < y] + \
+                [Not(Friends(g[x], g[y])) for x in g2 for y in g2
+                 if (x, y) not in friends and x < y] + \
+                [Smokes(g[x]) for x in smokes] + \
+                [Not(Smokes(g[x])) for x in g if x not in smokes] + \
+                [Cancer(g[x]) for x in cancer] + \
+                [Not(Cancer(g[x])) for x in g1 if x not in cancer] + \
+                [Forall(p, Not(Friends(p, p))),
+                 Forall((p, q), Equiv(Friends(p, q), Friends(q, p))),
+                 Equiv(Forall(p1, Implies(Smokes(p1), Cancer(p1))),
+                       Forall(p2, Implies(Smokes(p2), Cancer(p2)))),
+                 Equiv(Forall(p1, Implies(Cancer(p1), Smokes(p1))),
+                       Forall(p2, Implies(Cancer(p2), Smokes(p2))))]
+
+        loss_value = -(1.0 / tf.reduce_mean(1 / tf.concat(facts, axis=0))) + ltn.BIAS
+
+    # Use the gradient tape to automatically retrieve
+    # the gradients of the trainable variables with respect to the loss.
+    grads = tape.gradient(loss_value, variables)
+
+    # Run one step of gradient descent by updating
+    # the value of the variables to minimize the loss.
+    optimizer.apply_gradients(zip(grads, variables))
+
+    # Log every 200 batches.
+    if step % 100 == 0:
+        print(step, "=====>", loss_value, ltn.BIAS)
+
+df_smokes_cancer = pd.DataFrame(tf.concat([Smokes(p), Cancer(p)], axis=1).numpy(),
+                                columns=["Smokes", "Cancer"],
+                                index=list('abcdefghijklmn'))
+pred_friends = tf.squeeze(Friends(p, q)).numpy()
+df_friends_ah = pd.DataFrame(pred_friends[:8, :8],
+                             index=list('abcdefgh'),
+                             columns=list('abcdefgh'))
+df_friends_in = pd.DataFrame(pred_friends[8:, 8:],
+                             index=list('ijklmn'),
+                             columns=list('ijklmn'))
+plt.figure(figsize=(17, 5))
+plt.subplot(131)
+plt_heatmap(df_smokes_cancer)
+plt.subplot(132)
+plt_heatmap(df_friends_ah)
+plt.subplot(133)
+plt_heatmap(df_friends_in)
+plt.show()
 
 ''''
 with tf.Session() as sess:
