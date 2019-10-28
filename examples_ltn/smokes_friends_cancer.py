@@ -52,9 +52,9 @@ Smokes = ltn.predicate(size, label='Smokes')
 Cancer = ltn.predicate(size, label='Cancer')
 
 variables = list(g.values())
-variables.append(Friends.pars[1])
-variables.append(Smokes.pars[1])
-variables.append(Cancer.pars[1])
+variables.append(Friends.vars[1])
+variables.append(Smokes.vars[1])
+variables.append(Cancer.vars[1])
 
 
 def loss():
