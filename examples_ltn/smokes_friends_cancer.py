@@ -3,14 +3,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-import src.logictensornetworks.logictensornetworks as ltn
-from src.logictensornetworks.logictensornetworks import Not, Implies, Forall, Exists, Equiv
+import logictensornetworks as ltn
+from logictensornetworks import Not, Implies, Forall, Exists, Equiv
 
 pd.options.display.max_rows = 999
 pd.options.display.max_columns = 999
 pd.set_option('display.width', 1000)
 pd.options.display.float_format = '{:,.2f}'.format
-
 
 def plt_heatmap(df):
     plt.pcolor(df)
@@ -90,10 +89,10 @@ optimizer = tf.keras.optimizers.RMSprop(learning_rate=.01, decay=.9)
 # Iterate over the batches of the dataset.
 for step in range(10000):
     optimizer.minimize(loss, var_list=lambda: variables, )
-
     # Log every 200 batches.
     if step % 100 == 0:
-        print(step, "=====>", float(ltn.BIAS))
+        print(step, "=====>", float(ltn.getBias()))
+
 
 df_smokes_cancer = pd.DataFrame(tf.concat([Smokes(p), Cancer(p)], axis=1).numpy(),
                                 columns=["Smokes", "Cancer"],

@@ -1,13 +1,13 @@
 """
 :Date: Oct 24, 2019
-:Version: 0.0.4
+:Version: 0.0.5
 """
 import tensorflow as tf
 
 from norms import TRIANGULAR_NORMS
 
-BIAS_factor: float = 0.0
-BIAS: float = 0.0
+BIAS_factor: float = 1e-7
+BIAS = 0.0
 LAYERS: int = 4
 
 F_And = None
@@ -345,6 +345,10 @@ def cross_2args(X, Y):
     result.doms = eX_doms
 
     return result, [result1, result2]
+
+
+def getBias():
+    return BIAS
 
 
 '''DEFAULTS'''

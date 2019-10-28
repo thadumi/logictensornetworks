@@ -3,7 +3,7 @@
 import unittest
 import tensorflow as tf
 
-import src.logictensornetworks.logictensornetworks as ltn
+import logictensornetworks as ltn
 
 tf_variable_type = type(tf.Variable(1))
 
