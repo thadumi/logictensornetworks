@@ -1,6 +1,6 @@
 """
 :Date: Oct 24, 2019
-:Version: 0.0.3
+:Version: 0.0.4
 """
 import tensorflow as tf
 
@@ -122,7 +122,6 @@ def Forall(args, wff):
     return result
 
 
-@tf.function
 def Exists(vars, wff):
     if type(vars) is not tuple:
         vars = (vars,)
@@ -176,11 +175,60 @@ def constant(value=None, min_value=None, max_value=None, label='constant'):
 
 
 def function(label, input_shape_spec, output_shape_spec=1, fun_definition=None):
-    pass
+    if type(input_shape_spec) is list:
+        number_of_features = sum([int(v.shape[1]) for v in input_shape_spec])
+    elif type(input_shape_spec) is tf.Tensor:
+        number_of_features = int(input_shape_spec.shape[1])
+    else:
+        number_of_features = input_shape_spec
+    if fun_definition is None:
+        W = tf.Variable(
+            tf.random_normal(
+                [number_of_features + 1, output_shape_spec], mean=0, stddev=1), name="W" + label)
+
+        def apply_fun(*args):
+            tensor_args = tf.concat(args, axis=1)
+            X = tf.concat([tf.ones((tf.shape(tensor_args)[0], 1)),
+                           tensor_args], 1)
+            result = tf.matmul(X, W)
+            return result
+
+        vars = [W]
+    else:
+        def apply_fun(*args):
+            return fun_definition(*args)
+
+        vars = []
+
+    def fun(*args):
+        crossed_args, list_of_args_in_crossed_args = cross_args(args)
+        result = apply_fun(*list_of_args_in_crossed_args)
+        if crossed_args.doms != []:
+            result = tf.reshape(result, tf.concat([tf.shape(crossed_args)[:-1],
+                                                   tf.shape(result)[-1:]], axis=0))
+        else:
+            result = tf.reshape(result, (output_shape_spec,))
+        result.doms = crossed_args.doms
+        return result
+
+    fun.vars = vars
+    fun.label = label
+    return fun
 
 
-def proposition(label, initial_value=None, value=None):
-    pass
+def proposition(label='proposition', initial_value=None, value=None):
+    if value is not None:
+        assert 0 <= value <= 1
+        result = tf.constant([value], name=label)
+    elif initial_value is not None:
+        assert 0 <= initial_value <= 1
+        result = tf.Variable(initial_value=[value], name=label)
+    else:
+        result = tf.expand_dims(tf.clip_by_value(tf.Variable(tf.random_normal(shape=(), mean=.5, stddev=.5)), 0., 1.),
+                                dim=0)
+    result.doms = ()
+    return result
+
 
 def predicate(number_of_features_or_vars, pred_definition=None, layers=None, label='predicate'):
     layers = layers or LAYERS
@@ -192,6 +240,7 @@ def predicate(number_of_features_or_vars, pred_definition=None, layers=None, lab
         number_of_features = int(number_of_features_or_vars.shape[1])
     else:
         number_of_features = number_of_features_or_vars
+
     if pred_definition is None:
         # if there is not a custom predicate model defined create create the default schema
         W = tf.linalg.band_part(
@@ -216,18 +265,18 @@ def predicate(number_of_features_or_vars, pred_definition=None, layers=None, lab
             result = tf.sigmoid(gX, name=app_label)
             return result
 
-        pars = [W, u]
+        vars = [W, u]
     else:
         def apply_pred(*args):
             return pred_definition(*args)
 
-        pars = []
+        vars = []
 
     def pred(*args):
         global BIAS
         crossed_args, list_of_args_in_crossed_args = cross_args(args)
         result = apply_pred(*list_of_args_in_crossed_args)
-        if crossed_args.doms != []:
+        if crossed_args.doms:
             result = tf.reshape(result, tf.concat([tf.shape(crossed_args)[:-1], [1]], axis=0))
         else:
             result = tf.reshape(result, (1,))
@@ -235,7 +284,7 @@ def predicate(number_of_features_or_vars, pred_definition=None, layers=None, lab
         BIAS = tf.divide(BIAS + .5 - tf.reduce_mean(result), 2) * BIAS_factor
         return result
 
-    pred.pars = pars
+    pred.vars = vars
     pred.label = label
     return pred
 
