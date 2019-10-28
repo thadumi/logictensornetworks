@@ -1,9 +1,10 @@
 import tensorflow as tf
 import numpy as np
-import src.logictensornetworks.logictensornetworks as ltn
 import matplotlib.pyplot as plt
-from src.logictensornetworks.logictensornetworks import Not, And, Implies, Forall, Exists, Equiv
 import pandas as pd
+
+import src.logictensornetworks.logictensornetworks as ltn
+from src.logictensornetworks.logictensornetworks import Not, Implies, Forall, Exists, Equiv
 
 pd.options.display.max_rows = 999
 pd.options.display.max_columns = 999
@@ -125,5 +126,5 @@ print("Forall x,y Friends(x,y) -> (Smokes(x)->Smokes(y))",
       (Forall((p, q), Implies(Friends(p, q), Implies(Smokes(p), Smokes(q))))))
 print("Forall x: smokes(x) -> forall y: friend(x,y) -> smokes(y))",
       (Forall(p, Implies(Smokes(p),
-                                 Forall(q, Implies(Friends(p, q),
-                                                   Smokes(q)))))))
+                         Forall(q, Implies(Friends(p, q),
+                                           Smokes(q)))))))
