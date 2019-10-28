@@ -1,6 +1,6 @@
 """
 :Date: Oct 24, 2019
-:Version: 0.0.5
+:Version: 0.0.6
 """
 import tensorflow as tf
 
@@ -141,7 +141,7 @@ def Exists(vars, wff):
 
 
 def variable(feed, label='variable'):
-    if isinstance(feed, tf.Tensor):
+    if tf.is_tensor(feed):
         result = tf.identity(feed, name=label)
     else:
         result = tf.constant(feed, name=label)
@@ -177,7 +177,7 @@ def constant(value=None, min_value=None, max_value=None, label='constant'):
 def function(label, input_shape_spec, output_shape_spec=1, fun_definition=None):
     if type(input_shape_spec) is list:
         number_of_features = sum([int(v.shape[1]) for v in input_shape_spec])
-    elif type(input_shape_spec) is tf.Tensor:
+    elif tf.is_tensor(input_shape_spec):
         number_of_features = int(input_shape_spec.shape[1])
     else:
         number_of_features = input_shape_spec
@@ -236,7 +236,7 @@ def predicate(number_of_features_or_vars, pred_definition=None, layers=None, lab
 
     if type(number_of_features_or_vars) is list:  # list of vars I suppose
         number_of_features = sum([int(v.shape[1]) for v in number_of_features_or_vars])
-    elif type(number_of_features_or_vars) is tf.Tensor:
+    elif tf.is_tensor(number_of_features_or_vars):
         number_of_features = int(number_of_features_or_vars.shape[1])
     else:
         number_of_features = number_of_features_or_vars
