@@ -11,6 +11,7 @@ pd.options.display.max_columns = 999
 pd.set_option('display.width', 1000)
 pd.options.display.float_format = '{:,.2f}'.format
 
+
 def plt_heatmap(df):
     plt.pcolor(df)
     plt.yticks(np.arange(0.5, len(df.index), 1), df.index)
@@ -51,12 +52,35 @@ Smokes = ltn.predicate(size, label='Smokes')
 Cancer = ltn.predicate(size, label='Cancer')
 
 variables = list(g.values())
+# variables.append(Friends.vars[0])
 variables.append(Friends.vars[1])
+# variables.append(Smokes.vars[0])
 variables.append(Smokes.vars[1])
+# variables.append(Cancer.vars[0])
 variables.append(Cancer.vars[1])
 
+'''
+# @tf.function
+def fiends():
+    return tf.concat([Friends(g[x], g[y]) for (x, y) in friends], axis=0)
 
-def loss():
+
+# @tf.function
+def not_fiends():
+    return tf.concat([Not(Friends(g[x], g[y])) for x in g1 for y in g1
+                      if (x, y) not in friends and x < y] +
+                     [Not(Friends(g[x], g[y])) for x in g2 for y in g2
+                      if (x, y) not in friends and x < y]
+                     , axis=0)
+
+
+# @tf.function
+def smokers():
+    return tf.concat([Smokes(g[x]) for x in smokes], axis=0)
+'''
+
+
+def theory():
     facts = [Friends(g[x], g[y]) for (x, y) in friends] + \
             [Not(Friends(g[x], g[y])) for x in g1 for y in g1
              if (x, y) not in friends and x < y] + \
@@ -73,26 +97,21 @@ def loss():
              Equiv(Forall(p1, Implies(Cancer(p1), Smokes(p1))),
                    Forall(p2, Implies(Cancer(p2), Smokes(p2))))]
 
-    loss = -(1.0 / tf.reduce_mean(1 / tf.concat(facts, axis=0))) + ltn.BIAS
-
-    return loss
+    return tf.concat(facts, axis=0)
 
 
-# grads = tape.gradient(loss, variables)
+def loss(x):
+    return -(1.0 / tf.reduce_mean(1 / x)) + ltn.BIAS
+
 
 optimizer = tf.keras.optimizers.RMSprop(learning_rate=.01, decay=.9)
-# optimizer.minimize(loss, var_list=lambda: variables)
-
-# opt.apply_gradients(zip(grads, facts))
-
 
 # Iterate over the batches of the dataset.
 for step in range(10000):
-    optimizer.minimize(loss, var_list=lambda: variables, )
+    optimizer.minimize(lambda: loss(theory()), var_list=lambda: variables)
     # Log every 200 batches.
     if step % 100 == 0:
-        print(step, "=====>", float(ltn.getBias()))
-
+        print(step, "=====>", ltn.getBias().numpy())
 
 df_smokes_cancer = pd.DataFrame(tf.concat([Smokes(p), Cancer(p)], axis=1).numpy(),
                                 columns=["Smokes", "Cancer"],
@@ -114,16 +133,16 @@ plt_heatmap(df_friends_in)
 plt.show()
 
 print("forall x ~Friends(x,x)",
-      (Forall(p, Not(Friends(p, p)))))
+      (Forall(p, Not(Friends(p, p)))).numpy())
 print("Forall x Smokes(x) -> Cancer(x)",
-      (Forall(p, Implies(Smokes(p), Cancer(p)))))
+      (Forall(p, Implies(Smokes(p), Cancer(p)))).numpy())
 print("forall x y Friends(x,y) -> Friends(y,x)",
-      (Forall((p, q), Implies(Friends(p, q), Friends(q, p)))))
+      (Forall((p, q), Implies(Friends(p, q), Friends(q, p)))).numpy())
 print("forall x Exists y (Friends(x,y)",
-      (Forall(p, Exists(q, Friends(p, q)))))
+      (Forall(p, Exists(q, Friends(p, q)))).numpy())
 print("Forall x,y Friends(x,y) -> (Smokes(x)->Smokes(y))",
-      (Forall((p, q), Implies(Friends(p, q), Implies(Smokes(p), Smokes(q))))))
+      (Forall((p, q), Implies(Friends(p, q), Implies(Smokes(p), Smokes(q))))).numpy())
 print("Forall x: smokes(x) -> forall y: friend(x,y) -> smokes(y))",
       (Forall(p, Implies(Smokes(p),
                          Forall(q, Implies(Friends(p, q),
-                                           Smokes(q)))))))
+                                           Smokes(q)))))).numpy())

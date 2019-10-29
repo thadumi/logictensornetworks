@@ -1,6 +1,6 @@
 """
 :Date: Oct 24, 2019
-:Version: 0.0.7
+:Version: 0.0.71
 """
 import tensorflow as tf
 
@@ -241,12 +241,13 @@ def predicate(number_of_features_or_vars, pred_definition=None, layers=None, lab
 
     if pred_definition is None:
         # if there is not a custom predicate model defined create create the default schema
-        W = tf.linalg.band_part(
-            tf.Variable(
-                tf.random.normal(
-                    [layers,
-                     number_of_features + 1,
-                     number_of_features + 1], mean=0, stddev=1), name="W" + label), 0, -1)
+        w = tf.Variable(
+            tf.random.normal(
+                [layers,
+                 number_of_features + 1,
+                 number_of_features + 1], mean=0, stddev=1), name="W" + label)
+
+        W = tf.linalg.band_part(w, 0, -1)
         u = tf.Variable(tf.ones([layers, 1]),
                         name="u" + label)
 
@@ -263,7 +264,7 @@ def predicate(number_of_features_or_vars, pred_definition=None, layers=None, lab
             result = tf.sigmoid(gX, name=app_label)
             return result
 
-        vars = [W, u]
+        vars = [w, u]
     else:
         def apply_pred(*args):
             return pred_definition(*args)

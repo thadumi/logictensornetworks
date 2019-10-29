@@ -34,6 +34,8 @@ TRIANGULAR_NORMS = {
         'EQUIVALENT': tnorms.mean_equivalent,
     },
 
+    # #####  FOR FOL #####
+
     'universal': {
         'hmean': tnorms.hmean_universal_aggregation,
         'min': tnorms.min_universal_aggregation,
