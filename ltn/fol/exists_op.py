@@ -39,7 +39,7 @@ class LtnExists(LtnOperation):
         return [x for x in wff._ltn_doms if x not in [var._ltn_doms[0] for var in args]]
 
 
-def Forall(args, wff):
+def Exists(args, wff):
     if type(args) is not tuple and type(args) is not list:
         args = [args, ]
 
