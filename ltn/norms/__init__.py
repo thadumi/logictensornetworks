@@ -1,6 +1,6 @@
-from .norms_config import *
+import ltn.norms.norms_config
 
 # default configuration
-set_tnorm("luk")
-set_universal_aggregator('hmean')
-set_existential_aggregator('max')
+norms_config.set_tnorm("luk")
+norms_config.set_universal_aggregator('hmean')
+norms_config.set_existential_aggregator('max')

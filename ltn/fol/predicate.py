@@ -27,7 +27,7 @@ class LtnPredicate(LtnOperation):
 
         self._pred_definition = pred_definition
 
-    @tf.function
+    # @tf.function
     def call(self, *args):
         crossed_args, list_of_args_in_crossed_args = cross_args(args)
         result = self._pred_definition(*list_of_args_in_crossed_args)

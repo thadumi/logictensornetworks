@@ -78,7 +78,7 @@ def cross_args_doms(doms):
 
 def cross_2args_doms(x_doms, y_doms):
     if x_doms == [] and y_doms == []:
-        return [], [x_doms, y_doms]
+        return [], []
 
     X_Y = set(x_doms) - set(y_doms)
     Y_X = set(y_doms) - set(x_doms)

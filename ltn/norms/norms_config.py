@@ -10,6 +10,7 @@ F_Equiv = None
 F_ForAll = None
 F_Exists = None
 
+
 def set_tnorm(tnorm_kind: str):
     global F_And, F_Or, F_Implies, F_Not, F_Equiv
     assert tnorm_kind in TRIANGULAR_NORMS.keys()
