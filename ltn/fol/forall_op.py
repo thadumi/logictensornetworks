@@ -15,7 +15,6 @@ class LtnForall(LtnOperation):
         super(LtnForall, self).__init__(op_name='Forall')
 
     def call(self, args, wff, **kwargs):
-
         result_doms = [x for x in wff._ltn_doms if x not in [var._ltn_doms[0] for var in args]]
         quantif_axis = [wff._ltn_doms.index(var._ltn_doms[0]) for var in args]
 
