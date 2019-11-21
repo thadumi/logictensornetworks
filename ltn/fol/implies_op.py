@@ -1,11 +1,11 @@
 """
-:Date: Nov 19, 2019
-:Version: 0.0.1
+:Date: Nov 21, 2019
+:Version: 0.0.3
 """
 
 import tensorflow as tf
 
-from ltn.backend.ltn_utils import cross_2args_doms, cross_2args
+from ltn.backend.ltn_utils import cross_2args
 from ltn.fol.base_operation import LtnOperation
 from ltn.norms.norms_config import F_Implies
 
@@ -20,15 +20,17 @@ class LtnImplies(LtnOperation):
 
         super(LtnImplies, self).__init__(op_name=label)
 
+    def call(self, arg1_doms, arg2_doms, **kwargs):
+        eX_doms, _, _, tensor_cross_2args = cross_2args(x_ltn_doms=arg1_doms, y_ltn_doms=arg2_doms)
 
-    def call(self, arg1, arg2, **kwargs):
-        _, cross_wffs = cross_2args(arg1, arg2)
+        # @tf.function
+        def implies_op(arg1, arg2):
+            _, cross_wffs = tensor_cross_2args(arg1, arg2)
 
-        result = F_Implies(cross_wffs[0], cross_wffs[1])
-        return tf.identity(result, name=self._ltn_op_name)
+            result = F_Implies(cross_wffs[0], cross_wffs[1])
+            return tf.identity(result)
 
-    def compute_doms(self, *args, **kwargs):
-        return cross_2args_doms(args[0]._ltn_doms, args[1]._ltn_doms)[0]
+        return implies_op, eX_doms
 
 
 def Implies(*tensors):

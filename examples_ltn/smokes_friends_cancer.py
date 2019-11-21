@@ -1,10 +1,10 @@
-import tensorflow as tf
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+import tensorflow as tf
 
 import logictensornetworks as ltn
-from logictensornetworks import Not, Implies, Forall, Exists, Equiv
+from logictensornetworks import Not, Implies, Forall, Exists, Equiv, And
 
 pd.options.display.max_rows = 999
 pd.options.display.max_columns = 999
@@ -79,6 +79,11 @@ def smokers():
     return tf.concat([Smokes(g[x]) for x in smokes], axis=0)
 '''
 
+d = And(g['a'], g['b'])
+print(tf.shape(d))
+print(tf.shape(d))
+print(d)
+
 
 def theory():
     facts = [Friends(g[x], g[y]) for (x, y) in friends] + \
@@ -107,10 +112,10 @@ def loss(x):
 optimizer = tf.keras.optimizers.RMSprop(learning_rate=.01, decay=.9)
 
 # Iterate over the batches of the dataset.
-for step in range(10000):
+for step in range(100):
     optimizer.minimize(lambda: loss(theory()), var_list=lambda: variables)
     # Log every 200 batches.
-    if step % 100 == 0:
+    if step % 10 == 0:
         print(step, "=====>", ltn.getBias().numpy())
 
 df_smokes_cancer = pd.DataFrame(tf.concat([Smokes(p), Cancer(p)], axis=1).numpy(),
@@ -140,7 +145,7 @@ print("forall x y Friends(x,y) -> Friends(y,x)",
       (Forall((p, q), Implies(Friends(p, q), Friends(q, p)))).numpy())
 print("forall x Exists y (Friends(x,y)",
       (Forall(p, Exists(q, Friends(p, q)))).numpy())
-print("Forall x,y Friends(x,y) -> (Smokes(x)->Smokes(y))",
+print("Forall x,y Friends(x,ay) -> (Smokes(x)->Smokes(y))",
       (Forall((p, q), Implies(Friends(p, q), Implies(Smokes(p), Smokes(q))))).numpy())
 print("Forall x: smokes(x) -> forall y: friend(x,y) -> smokes(y))",
       (Forall(p, Implies(Smokes(p),

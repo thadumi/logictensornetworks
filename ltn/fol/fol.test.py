@@ -7,7 +7,6 @@ sample smokes_friends_cancer for testing the APIs
 
 import tensorflow as tf
 
-
 import ltn.backend.fol_status as FOL
 from constant import constant
 from equivalence_op import Equiv
@@ -17,6 +16,8 @@ from implies_op import Implies
 from not_op import Not
 from predicate import predicate
 from variable import variable
+
+print(len(FOL._TF_VARIABLES))
 
 size = 10
 
@@ -62,18 +63,18 @@ def theory():
 
 
 def loss(x):
-    return 1 - (1.0 / tf.reduce_mean(1 / x))
+    return - (1.0 / tf.reduce_mean(1 / x))
 
 
 optimizer = tf.keras.optimizers.RMSprop(learning_rate=.01, decay=.9)
 
-for step in range(1):
-    loss_step = loss(theory())
+for step in range(300):
+    # loss_step = loss(theory())
 
     optimizer.minimize(lambda: loss(theory()), var_list=lambda: FOL._TF_VARIABLES)
 
-    if step % 100 == 0:
-        print(step, "========>", loss_step.numpy())
+    if step % 10 == 0:
+        print(step, "========>")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -127,26 +128,3 @@ print("Forall x: smokes(x) -> forall y: friend(x,y) -> smokes(y))",
       (Forall(p, Implies(Smokes(p),
                          Forall(q, Implies(Friends(p, q),
                                            Smokes(q)))))).numpy())
-
-
-'''def pippo(x_ltn_doms, y_ltn_doms):
-    X_Y = set(x_ltn_doms) - set(y_ltn_doms)
-    Y_X = set(y_ltn_doms) - set(x_ltn_doms)
-
-    def expands_x(X):
-        tmp_X = X
-        for _ in range(len(Y_X)):
-            tmp_X = tf.expand_dims(tmp_X, 0)
-        return tmp_X
-
-    def expands_y(Y):
-        tmp_Y = Y
-        for _ in range(len(X_Y)):
-            tmp_Y = tf.expand_dims(tmp_Y, -2)
-        return tmp_Y
-
-    @tf.function
-    def ugo(t1, t2):
-        return tf.concat([expands_x(t1), expands_y(t2)], axis=0)
-
-    return ugo, X_Y'''

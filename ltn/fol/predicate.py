@@ -1,11 +1,11 @@
 """
-:Date: Nov 19, 2019
-:Version: 0.0.1
+:Date: Nov 21, 2019
+:Version: 0.0.3
 """
 
 import tensorflow as tf
 
-from ltn.backend.ltn_utils import cross_args, cross_args_doms
+from ltn.backend.ltn_utils import cross_args
 from ltn.fol.base_operation import LtnOperation
 
 
@@ -27,23 +27,31 @@ class LtnPredicate(LtnOperation):
 
         self._pred_definition = pred_definition
 
-    # @tf.function
-    def call(self, *args):
-        crossed_args, list_of_args_in_crossed_args = cross_args(args)
-        result = self._pred_definition(*list_of_args_in_crossed_args)
-        if crossed_args._ltn_doms:
-            result = tf.reshape(result, tf.concat([tf.shape(crossed_args)[:-1], [1]], axis=0))
+    def call(self, *doms, **kwargs):
+        tensor_cross_args, result_doms = cross_args(doms)
+
+        if result_doms:
+            def reshape(result, crossed_args):
+                return tf.reshape(result,
+                                  tf.concat([tf.shape(crossed_args)[:-1], [1]],
+                                            axis=0))
         else:
-            result = tf.reshape(result, (1,))
-        return result
+            def reshape(result, crossed_args):
+                return tf.reshape(result, (1,))
+
+        _pred_definition = self._pred_definition
+
+        # @tf.function
+        def predicate_op(*args):
+            crossed_args, list_of_args_in_crossed_args = tensor_cross_args(args)
+            result = _pred_definition(*list_of_args_in_crossed_args)
+            return reshape(result, crossed_args)
+
+        return predicate_op, result_doms
 
     @property
     def pred(self):
         return self._pred
-
-    def compute_doms(self, *args, **kwargs):
-        doms = cross_args_doms(doms=[arg._ltn_doms for arg in args])
-        return doms
 
     def __create_default_predicate_model(self):
         w = self._add_weight(
@@ -54,6 +62,7 @@ class LtnPredicate(LtnOperation):
 
         u = self._add_weight(tf.ones([self._layers, 1]), name="u" + self._ltn_op_name)
 
+        # @tf.function
         def pred_definition(*args):
             W = tf.linalg.band_part(w, 0, -1)
             tensor_args = tf.concat(args, axis=1)
@@ -69,8 +78,7 @@ class LtnPredicate(LtnOperation):
 
 
 def predicate(label, number_of_variables_or_features):
-
-    if type(number_of_variables_or_features) is list:  # list of vars
+    if type(number_of_variables_or_features) is list:  # list of vars/consts
         number_of_features = sum([int(v.shape[1]) for v in number_of_variables_or_features])
     elif tf.is_tensor(number_of_variables_or_features):
         number_of_features = int(number_of_variables_or_features.shape[1])

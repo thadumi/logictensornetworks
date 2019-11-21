@@ -52,8 +52,8 @@ def And(*wffs):
         result.doms = []
     else:
         cross_wffs, _ = cross_args(wffs)
-        label = "_AND_".join([wff.name.split(':'[0]) for wff in wffs])
-        result = tf.identity(F_And(cross_wffs), name=label)
+#        label = "_AND_".join([wff.name.split(':'[0]) for wff in wffs])
+        result = tf.identity(F_And(cross_wffs))
         result.doms = cross_wffs.doms
     return result
 
@@ -88,6 +88,7 @@ def Not(wff):
     result.doms = wff.doms
     return result
 
+
 def Equiv(wff1, wff2):
     _, cross_wffs = cross_2args(wff1, wff2)
     label = wff1.name.split(":")[0] + "_IFF_" + wff2.name.split(":")[0] if not tf.executing_eagerly() else '_IFF_'
@@ -96,6 +97,7 @@ def Equiv(wff1, wff2):
     result = tf.identity(result, name=label)
     result.doms = cross_wffs[0].doms
     return result
+
 
 def Forall(args, wff):
     if type(args) is not tuple:
@@ -224,7 +226,7 @@ def proposition(label='proposition', initial_value=None, value=None):
     else:
         result = tf.expand_dims(tf.clip_by_value(tf.Variable(tf.random_normal(shape=(), mean=.5, stddev=.5)), 0., 1.),
                                 dim=0)
-    result.doms = ()
+    result.doms = []
     return result
 
 

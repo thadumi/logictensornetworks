@@ -1,6 +1,6 @@
 """
-:Date: Nov 19, 2019
-:Version: 0.0.1
+:Date: Nov 21, 2019
+:Version: 0.0.3
 """
 
 import tensorflow as tf
@@ -11,21 +11,30 @@ from ltn.fol.base_operation import LtnOperation
 
 class LtnConstant(LtnOperation):
     def __init__(self, const_name):
-        super(LtnConstant, self).__init__(op_name='Constant_' + const_name, domain=[])
+        super(LtnConstant, self).__init__(op_name='C_' + const_name, domain=[])
         self._const = const_name
 
     def call(self, value=None,
-             min_value=None, max_value=None):
+             min_value=None, max_value=None,
+             **kwargs):
         label = self._ltn_op_name
         if value is not None:
-            const = tf.constant(value, name=label)
+            # @tf.function
+            def const():
+                return tf.constant(value, name=label)
         else:
-            const = self._add_weight(tf.random.uniform(shape=(1, len(min_value)),
-                                                       minval=min_value,
-                                                       maxval=max_value),
-                                     name=label)
-        FOL.CONSTANTS[self._const] = const
-        return const
+            const_tensor = self._add_weight(tf.random.uniform(shape=(1, len(min_value)),
+                                                              minval=min_value,
+                                                              maxval=max_value),
+                                            name=label)
+            # @tf.function
+            def const():
+                return const_tensor
+
+        return const, []
+
+    def update_ltn_global_status(self, result_doms, output):
+        FOL.CONSTANTS[self._const] = output
 
     @property
     def const(self):

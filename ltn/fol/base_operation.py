@@ -1,6 +1,6 @@
 """
-:Date: Nov 19, 2019
-:Version: 0.0.1
+:Date: Nov 21, 2019
+:Version: 0.0.3
 """
 
 import tensorflow as tf
@@ -19,20 +19,36 @@ class LtnOperation(object):
         self._weights = []
 
     def __call__(self, *args, **kwargs):
-        # needs domain to be fixed?
-        # cross_args
-        output = self.call(*args, **kwargs)
+        doms = []
+        for arg in args:
+            if type(arg) is tuple or type(arg) is list:
+                doms.append([_arg._ltn_doms for _arg in arg])
+            else:
+                doms.append(arg._ltn_doms)
+
+        # TODO/MEMO(thadumi): this could be a list of lambdas not just one
+        # kwargs['tensor_cross_args'] = tensor_cross_args
+        # kwargs['result_doms'] = result_doms  # TODO(thadumi) should split into two calls like cross_args
+
+        tensor_computation, result_doms = self.call(*doms, **kwargs)
+        output = tensor_computation(*args)
 
         # TODO(thadumi) add a history track
-        self._ltn_doms = self.compute_doms(*args, **kwargs)
+        self.update_ltn_global_status(result_doms, output)
 
+        # self._ltn_doms = result_doms
         output._ltn_op = self  # store the instance of the operation which generated the output
-        output._ltn_doms = self._ltn_doms
+        output._ltn_doms = result_doms
 
         return output
 
-    def call(self, *args, **kwargs):
-        raise Exception('exec operation not implemented')
+    def call(self, *doms, **kwargs):
+        """
+        :param doms: the doms arguments
+        :param kwargs: external kwargs given by the user plus the kwargs
+        :return: the new doms and a lambda containing the computation which needs to be done on the real arguments (aka tensors)
+        """
+        raise Exception('call operation not implemented')
 
     def _add_weight(self, *args, **kwargs):
         w = tf.Variable(*args, **kwargs)
@@ -45,8 +61,8 @@ class LtnOperation(object):
 
         return w
 
-    def compute_doms(self, *args, **kwargs):
-        return self._ltn_doms
+    def update_ltn_global_status(self, *args, **kwargs):
+        pass
 
     @property
     def doms(self):

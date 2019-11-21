@@ -1,6 +1,6 @@
 """
-:Date: Nov 19, 2019
-:Version: 0.0.1
+:Date: Nov 21, 2019
+:Version: 0.0.3
 """
 
 import tensorflow as tf
@@ -14,30 +14,29 @@ class LtnExists(LtnOperation):
     def __init__(self):
         super(LtnExists, self).__init__(op_name='Exists')
 
-    def call(self, *args, **kwargs):
-        vars = args[0]
-        wff = args[-1]
+    def call(self, vars_doms, wff_doms, **kwargs):
+        if type(vars_doms[0]) is not list:
+            vars_doms = (vars_doms,)
 
+        result_doms = [x for x in wff_doms if x not in [var[0] for var in vars_doms]]
+        quantif_axis = [wff_doms.index(var_doms[0]) for var_doms in vars_doms]
 
-        #if type(vars) is not tuple or type(vars) is not list:
-        #    vars = (vars,)
+        zeros_length = len(result_doms) + 1
 
-        result_doms = [x for x in wff._ltn_doms if x not in [var._ltn_doms[0] for var in vars]]
-        quantif_axis = [wff._ltn_doms.index(var_doms) for var_doms in [var._ltn_doms[0] for var in vars]]
+        # @tf.function
+        def exists_op(vars, wff):
+            not_empty_vars = tf.cast(tf.math.reduce_prod(tf.stack([tf.size(var) for var in vars])),
+                                     dtype=tf.dtypes.bool)
+            zeros = tf.zeros((1,) * zeros_length)
 
-        not_empty_vars = tf.cast(tf.math.reduce_prod(tf.stack([tf.size(var) for var in vars])), dtype=tf.dtypes.bool)
-        zeros = tf.zeros((1,) * (len(result_doms) + 1))
+            if not_empty_vars:
+                result = F_Exists(quantif_axis, wff)
+            else:
+                result = zeros
 
-        if not_empty_vars:
-            result = F_Exists(quantif_axis, wff)
-        else:
-            result = zeros
-        return result
+            return result
 
-    def compute_doms(self, *args, **kwargs):
-        wff = args[-1]
-        vars = args[0]
-        return [x for x in wff._ltn_doms if x not in [var._ltn_doms[0] for var in vars]]
+        return exists_op, result_doms
 
 
 def Exists(args, wff):

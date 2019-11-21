@@ -1,6 +1,6 @@
 """
-:Date: Nov 19, 2019
-:Version: 0.0.1
+:Date: Nov 21, 2019
+:Version: 0.0.3
 """
 
 import tensorflow as tf
@@ -14,25 +14,28 @@ class LtnForall(LtnOperation):
     def __init__(self):
         super(LtnForall, self).__init__(op_name='Forall')
 
-    def call(self, args, wff, **kwargs):
-        result_doms = [x for x in wff._ltn_doms if x not in [var._ltn_doms[0] for var in args]]
-        quantif_axis = [wff._ltn_doms.index(var._ltn_doms[0]) for var in args]
+    def call(self, args_doms, wff_doms, tensor_cross_args=None, result_doms=None, **kwargs):
+        if type(args_doms[0]) is not list:
+            args = (args_doms,)
 
-        not_empty_vars = tf.cast(
-            tf.math.reduce_prod(tf.stack([tf.size(var) for var in args])),
-            dtype=tf.dtypes.bool)
+        result_doms = [x for x in wff_doms if x not in [arg_doms[0] for arg_doms in args_doms]]
+        quantif_axis = [wff_doms.index(arg_doms[0]) for arg_doms in args_doms]
 
-        ones = tf.ones((1,) * (len(result_doms) + 1))
+        ones_length = len(result_doms) + 1
 
-        # if not_empty_vars:
-        #    result = F_ForAll(quantif_axis, wff)
-        # else:
-        #    result = ones
+        # @tf.function
+        def forall_op(args, wff):
+            not_empty_vars = tf.cast(tf.math.reduce_prod(tf.stack([tf.size(var) for var in args])),
+                                     dtype=tf.dtypes.bool)
+            if not_empty_vars:
+                result = F_ForAll(quantif_axis, wff)
+            else:
+                result = tf.ones((1,) * ones_length)
+            # tf.cond(not_empty_vars, lambda: F_ForAll(quantif_axis, wff), lambda: ones)
 
-        return tf.cond(not_empty_vars, lambda: F_ForAll(quantif_axis, wff), lambda: ones)
+            return result
 
-    def compute_doms(self, args, wff, **kwargs):
-        return [x for x in wff._ltn_doms if x not in [var._ltn_doms[0] for var in args]]
+        return forall_op, result_doms
 
 
 def Forall(args, wff):

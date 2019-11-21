@@ -1,8 +1,7 @@
 """
-:Date: Nov 19, 2019
-:Version: 0.0.1
+:Date: Nov 21, 2019
+:Version: 0.0.3
 """
-
 import tensorflow as tf
 
 from ltn.fol.base_operation import LtnOperation
@@ -18,11 +17,12 @@ class LtnNot(LtnOperation):
 
         super(LtnNot, self).__init__(op_name='NOT_' + tensors_meta)
 
-    def call(self, *args, **kwargs):
-        return tf.identity(F_Not(args[0]), name=self._ltn_op_name)
+    def call(self, *doms, **kwargs):
+        # @tf.function
+        def not_op(*args):
+            return F_Not(args[0])
 
-    def compute_doms(self, *args, **kwargs):
-        return args[0]._ltn_doms
+        return not_op, doms[0]
 
 
 def Not(*tensors):

@@ -1,11 +1,11 @@
 """
-:Date: Nov 19, 2019
-:Version: 0.0.1
+:Date: Nov 21, 2019
+:Version: 0.0.3
 """
 
 import tensorflow as tf
 
-from ltn.backend.ltn_utils import cross_args, cross_args_doms
+from ltn.backend.ltn_utils import cross_args
 from ltn.fol.base_operation import LtnOperation
 from ltn.norms.norms_config import F_Or
 
@@ -20,16 +20,17 @@ class LtnOr(LtnOperation):
 
         super(LtnOr, self).__init__(op_name=label)
 
-    @tf.function
-    def call(self, *args, **kwargs):
-        if len(args) == 0:
-            return tf.constant(0.0)
+    def call(self, *doms, **kwargs):
+        if len(doms) == 0:
+            return lambda *args: tf.constant(0.0), []
         else:
-            cross_wffs, _ = cross_args(args)
-            return tf.identity(F_Or(cross_wffs), name=self._ltn_op_name)
+            tensor_cross_args, result_doms = cross_args(doms)
 
-    def compute_doms(self, *args, **kwargs):
-        return [] if len(args) == 0 else cross_args_doms(doms=[arg._ltn_doms for arg in args])
+            def or_op(*args):
+                cross_wffs, _ = tensor_cross_args(args)
+                return F_Or(cross_wffs)
+
+            return or_op, result_doms
 
 
 def Or(*tensors):
