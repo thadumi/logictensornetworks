@@ -16,16 +16,16 @@ def validate_label(label):
 def cross_args(doms):
     result_doms = doms[0]
 
-    lamndas = []
+    lambdas = []
     for y_dom in doms[1:]:
         result_doms, _, _, _cross_2args = cross_2args(x_ltn_doms=result_doms, y_ltn_doms=y_dom)
-        lamndas.append(_cross_2args)
+        lambdas.append(_cross_2args)
 
     @tf.function
     def tensor_cross_args(tensors):
         result_tensor = tensors[0]
-        for i in range(len(lamndas)):
-            cross = lamndas[i]
+        for i in range(len(lambdas)):
+            cross = lambdas[i]
             result_tensor, _ = cross(result_tensor, tensors[i])
 
         result_flat = tf.reshape(result_tensor,
