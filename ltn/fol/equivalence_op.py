@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from ltn.backend.ltn_utils import cross_2args
 from ltn.fol.base_operation import LtnOperation
-from ltn.norms.norms_config import F_Equiv
+from ltn.backend.norms import F_Equiv
 
 
 class LtnEquivalence(LtnOperation):

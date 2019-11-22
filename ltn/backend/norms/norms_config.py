@@ -1,4 +1,4 @@
-from .t_norms import TRIANGULAR_NORMS
+from t_norms import TRIANGULAR_NORMS
 
 F_And = None
 F_Or = None

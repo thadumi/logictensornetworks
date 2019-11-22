@@ -6,7 +6,7 @@
 import tensorflow as tf
 
 from ltn.fol.base_operation import LtnOperation
-from ltn.norms.norms_config import F_Exists
+from ltn.backend.norms import F_Exists
 
 
 class LtnExists(LtnOperation):

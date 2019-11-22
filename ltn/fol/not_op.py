@@ -2,10 +2,9 @@
 :Date: Nov 21, 2019
 :Version: 0.0.3
 """
-import tensorflow as tf
 
 from ltn.fol.base_operation import LtnOperation
-from ltn.norms.norms_config import F_Not
+from ltn.backend.norms import F_Not
 
 
 class LtnNot(LtnOperation):
