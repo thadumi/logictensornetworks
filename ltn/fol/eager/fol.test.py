@@ -8,14 +8,14 @@ sample smokes_friends_cancer for testing the APIs
 import tensorflow as tf
 
 import ltn.backend.fol_status as FOL
-from constant import constant
-from equivalence_op import Equiv
-from exists_op import Exists
-from forall_op import Forall
-from implies_op import Implies
-from not_op import Not
-from predicate import predicate
-from variable import variable
+from eager.constant import constant
+from eager.equivalence_op import Equiv
+from eager.exists_op import Exists
+from eager.forall_op import Forall
+from eager.implies_op import Implies
+from eager.not_op import Not
+from eager.predicate import predicate
+from eager.variable import variable
 
 print(len(FOL._TF_VARIABLES))
 

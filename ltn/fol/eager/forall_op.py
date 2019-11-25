@@ -5,7 +5,7 @@
 
 import tensorflow as tf
 
-from ltn.fol.base_operation import LtnOperation
+from eager.base_operation import LtnOperation
 from ltn.backend.norms import F_ForAll
 
 
