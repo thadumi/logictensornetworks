@@ -55,9 +55,9 @@ class LtnOperation(object):
         self._weights.append(w)
 
         # TODO(thadumi) move into FOL with a function like track_variable(var, owner)
-        if self._ltn_op_name not in FOL._TF_VARIABLES.keys():
-            FOL._TF_VARIABLES[self._ltn_op_name] = []
-        FOL._TF_VARIABLES[self._ltn_op_name].append(w)
+        #if self._ltn_op_name not in FOL._TF_VARIABLES.keys():
+        #    FOL._TF_VARIABLES[self._ltn_op_name] = []
+        FOL._TF_VARIABLES.append(w)
 
         return w
 

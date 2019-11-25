@@ -17,8 +17,6 @@ from eager.not_op import Not
 from eager.predicate import predicate
 from eager.variable import variable
 
-print(len(FOL._TF_VARIABLES))
-
 size = 10
 
 g1 = {l: constant(label=l, min_value=[0.] * size, max_value=[1.] * size) for l in 'abcdefgh'}
@@ -68,7 +66,7 @@ def loss(x):
 
 optimizer = tf.keras.optimizers.RMSprop(learning_rate=.01, decay=.9)
 
-for step in range(300):
+for step in range(1):
     # loss_step = loss(theory())
 
     optimizer.minimize(lambda: loss(theory()), var_list=lambda: FOL._TF_VARIABLES)
