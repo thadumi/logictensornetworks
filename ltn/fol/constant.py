@@ -1,7 +1,7 @@
 """
 :Author: thadumi
 :Date: 25/11/19
-:Version: 0.0.1
+:Version: 0.0.2
 """
 
 import logging
@@ -15,7 +15,7 @@ from ltn.fol.logic import LogicalComputation
 
 class LogicalConstant(LogicalComputation):
     def __init__(self, **kwargs):
-        super(LogicalConstant, self).__init__(None, [])
+        super(LogicalConstant, self).__init__(None, [], [])
         self.name = kwargs['name']
         self._definition = None
 

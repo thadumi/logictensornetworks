@@ -1,7 +1,7 @@
 """
 :Author: thadumi
 :Date: 25/11/19
-:Version: 0.0.1
+:Version: 0.0.2
 """
 
 import logging
@@ -20,7 +20,7 @@ class LogicalPredicate(LogicalComputation):
                  input_doms=None,
                  output_doms=None,
                  input_term=None):
-        super(LogicalPredicate, self).__init__(input_doms, output_doms)
+        super(LogicalPredicate, self).__init__(input_doms, output_doms, [])
         self.predicate = name
         self.input_terms = input_term
 

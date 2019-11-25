@@ -1,26 +1,35 @@
 """
 :Author: thadumi
 :Date: 25/11/19
-:Version: 0.0.1
+:Version: 0.0.2
 """
+
+import tensorflow as tf
+
 from ltn_utils import cross_args, cross_2args
 
 
 class LogicalComputation(object):
     def __init__(self,
                  in_doms,
-                 out_doms):
-        self._in_doms = in_doms
+                 out_doms,
+                 args):
+        self._in_doms = in_doms  # TODO(thadumi): this could be removed and computed using _ltn_args
         self._out_doms = out_doms
-        self._ltn_args = []
+        self._ltn_args = args
 
     @property
     def doms(self):
         return self._out_doms
 
     @property
-    def as_tensor(self):
+    def tensor(self) -> tf.Tensor:
+        # call the definition aka definition(*[arg.tensor() for arg in args])
         pass
+
+    @property
+    def numpy(self):
+        return self.tensor.numpy()
 
     def and_(self, other):
         return self.__and__(other)
@@ -66,52 +75,47 @@ class LogicalComputation(object):
 
 class AndLogicalComputation(LogicalComputation):
     def __init__(self, in_doms, out_doms, args=None):
-        super(AndLogicalComputation, self).__init__(in_doms, out_doms)
-        self.args = args
+        super(AndLogicalComputation, self).__init__(in_doms, out_doms, args)
 
     def __str__(self):
-        return ' ∧ '.join([str(arg) for arg in self.args])
+        return ' ∧ '.join([str(arg) for arg in self._ltn_args])
 
 
 class OrLogicalComputation(LogicalComputation):
     def __init__(self, in_doms, out_doms, args=None):
-        super(OrLogicalComputation, self).__init__(in_doms, out_doms)
-        self.args = args
+        super(OrLogicalComputation, self).__init__(in_doms, out_doms, args)
 
     def __str__(self):
-        return ' ∨ '.join([str(arg) for arg in self.args])
+        return ' ∨ '.join([str(arg) for arg in self._ltn_args])
 
 
 class NotLogicalComputation(LogicalComputation):
-    def __init__(self, in_doms, out_doms, args=None):
-        super(NotLogicalComputation, self).__init__(in_doms, out_doms)
-        self.args = args
+    def __init__(self, in_doms, out_doms, args):
+        super(NotLogicalComputation, self).__init__(in_doms, out_doms, args)
 
     def __str__(self):
-        return '¬' + str(self.args)
+        return '¬' + str(self._ltn_args)
 
 
 class ImpliesLogicalComputation(LogicalComputation):
-    def __init__(self, in_doms, out_doms, args=None):
-        super(ImpliesLogicalComputation, self).__init__(in_doms, out_doms)
-        self.args = args
+    def __init__(self, in_doms, out_doms, args):
+        super(ImpliesLogicalComputation, self).__init__(in_doms, out_doms, args)
 
     def __str__(self):
-        return str(self.args[0]) + ' ⇒ ' + str(self.args[1])
+        return str(self._ltn_args[0]) + ' ⇒ ' + str(self._ltn_args[1])
 
 
 class EquivalenceLogicalComputation(LogicalComputation):
-    def __init__(self, in_doms, out_doms, args=None):
-        super(EquivalenceLogicalComputation, self).__init__(in_doms, out_doms)
-        self.args = args
+    def __init__(self, in_doms, out_doms, args):
+        super(EquivalenceLogicalComputation, self).__init__(in_doms, out_doms, args)
 
     def __str__(self):
-        return str(self.args[0]) + ' ⇔ ' + str(self.args[1])
+        return str(self._ltn_args[0]) + ' ⇔ ' + str(self._ltn_args[1])
 
 
 class ForAllLogicalComputation(LogicalComputation):
     def __init__(self, in_doms, out_doms, variables, proposition):
-        super(ForAllLogicalComputation, self).__init__(in_doms, out_doms)
+        super(ForAllLogicalComputation, self).__init__(in_doms, out_doms, args=[*variables, proposition])
         self.vars = variables
         self.proposition = proposition
 
@@ -121,7 +125,7 @@ class ForAllLogicalComputation(LogicalComputation):
 
 class ExistsLogicalComputation(LogicalComputation):
     def __init__(self, in_doms, out_doms, variables, proposition):
-        super(ExistsLogicalComputation, self).__init__(in_doms, out_doms)
+        super(ExistsLogicalComputation, self).__init__(in_doms, out_doms, args=[*variables, proposition])
         self.vars = variables
         self.proposition = proposition
 
