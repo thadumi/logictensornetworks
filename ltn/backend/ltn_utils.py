@@ -58,6 +58,7 @@ def cross_2args(x_ltn_doms=None, y_ltn_doms=None):
         eX_doms = [y] + eX_doms
     number_of_times_x_expands = len(Y_X)
 
+    @tf.function
     def expands_x(X):
         tmp_X = X
         for _ in range(number_of_times_x_expands):
@@ -71,6 +72,7 @@ def cross_2args(x_ltn_doms=None, y_ltn_doms=None):
         eY_doms.append(x)
     number_of_times_y_expands = len(X_Y)
 
+    @tf.function
     def expands_y(Y):
         tmp_Y = Y
         for _ in range(number_of_times_y_expands):
@@ -82,7 +84,6 @@ def cross_2args(x_ltn_doms=None, y_ltn_doms=None):
         perm_eY.append(eX_doms.index(y))
 
     # eY = tf.transpose(eY, perm=perm_eY + [len(perm_eY)])
-
     def transpose_y(Y):
         # tf.print(tf.shape(Y), perm_eY, perm_eY + [len(perm_eY)])
         return tf.transpose(Y, perm=perm_eY + [len(perm_eY)])

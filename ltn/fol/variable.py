@@ -1,42 +1,47 @@
 """
-:Date: Nov 21, 2019
-:Version: 0.0.3
+:Author: Theodor A. Dumitrescu
+:Date: 25/11/19
+:Version: 0.0.1
 """
+
+import logging
+from typing import List
 
 import tensorflow as tf
 
 import ltn.backend.fol_status as FOL
-from ltn.fol.base_operation import LtnOperation
+from ltn.fol.constant import LogicalConstant
+from ltn.fol.logic import LogicalComputation
 
 
-class LtnVariable(LtnOperation):
-    def __init__(self, var_name):
-        super(LtnVariable, self).__init__(op_name='V_' + var_name, domain=[var_name])
-        self._var = var_name
+class LogicalVariable(LogicalComputation):
 
-    def call(self, *args, tensor=None, constants=None, **kwargs):
-        label = self._ltn_op_name
-        if tensor is not None:
-            def var(*_args):
-                return tf.identity(tensor, name=label)
+    def __init__(self,
+                 name=None,
+                 static_value=None,
+                 constants=None):
+        super(LogicalVariable, self).__init__(None, [name])
+        self.name = name
+        self.value = static_value
 
-        elif constants is not None:
-            consts = constants if type(constants) is list or type(constants) is tuple else [constants, ]
+        self.closed_world = constants is not None
+        self.constants = constants
 
-            def var(*_args):
-                return tf.concat(consts, axis=0, name=label)
-        else:
-            raise Exception('Trying to create a Variable without defining its value')
-
-        return var, [self.var]
-
-    @property
-    def var(self):
-        return self._var
-
-    def update_ltn_global_status(self, result_doms, output):
-        FOL.VARIABLES[self._var] = output
+    def __str__(self):
+        return self.name
 
 
-def variable(label, tensor=None, constants=None):
-    return LtnVariable(label)(tensor=tensor, constants=constants)
+def variable(name: str, tensor: tf.Tensor = None, constants: List[LogicalConstant] = None) -> LogicalVariable:
+    if FOL.variable_already_defined(name):
+        msg = '[variable] There is already a variable having the name `{}`'.format(name)
+        logging.error(msg)
+
+        raise ValueError(msg)
+
+    if constants:
+        constants = [c.name for c in constants]
+
+    var = LogicalVariable(name=name, static_value=tensor, constants=constants)
+    FOL.track_variable(name, var)
+
+    return var
