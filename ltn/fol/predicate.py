@@ -1,7 +1,7 @@
 """
 :Author: thadumi
-:Date: 25/11/19
-:Version: 0.0.2
+:Date: 26/11/19
+:Version: 0.0.3
 """
 
 import logging
@@ -16,16 +16,30 @@ from ltn.backend.ltn_utils import cross_args
 
 class LogicalPredicate(LogicalComputation):
     def __init__(self,
-                 name=None,
+                 predicate,
                  input_doms=None,
                  output_doms=None,
-                 input_term=None):
-        super(LogicalPredicate, self).__init__(input_doms, output_doms, [])
-        self.predicate = name
-        self.input_terms = input_term
+                 input_terms=None,
+                 computation=None):
+        super(LogicalPredicate, self).__init__(input_doms, output_doms, input_terms)
+        self.predicate = predicate
+        self.computation = computation
+
+    @tf.function
+    def _compute(self, args):
+        crossed_args, list_of_args_in_crossed_args = self.computation(args)
+        result = self.predicate.predicate_definition(*list_of_args_in_crossed_args)
+        return self._reshape(result, crossed_args)
+
+    def _reshape(self, result, crossed_args):
+        if self._out_doms:
+            return tf.reshape(result, (1,))
+        else:
+            return tf.reshape(result,
+                              tf.concat([tf.shape(crossed_args)[:-1], [1]], axis=0))
 
     def __str__(self):
-        return self.predicate + '(' + ', '.join([str(i) for i in self.input_terms]) + ')'
+        return self.predicate.name + '(' + ', '.join([str(i) for i in self.input_terms]) + ')'
 
 
 class Predicate(object):
@@ -41,9 +55,10 @@ class Predicate(object):
         input_doms = [arg.doms for arg in args]
         tensor_cross_args, output_doms = cross_args(input_doms)
 
-        return LogicalPredicate(self.name,
+        return LogicalPredicate(self,
                                 input_doms, output_doms,
-                                [*args])
+                                [*args],
+                                tensor_cross_args)
 
 
 def predicate(name: str,
