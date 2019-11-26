@@ -1,7 +1,7 @@
 """
 :Author: thadumi
 :Date: 26/11/19
-:Version: 0.0.4
+:Version: 0.0.5
 """
 
 import tensorflow as tf
@@ -180,7 +180,7 @@ class ExistsLogicalComputation(LogicalComputation):
         super(ExistsLogicalComputation, self).__init__(in_doms, out_doms, args=[*variables, proposition])
         self.vars = variables
         self.proposition = proposition
-        self.quantif_axis = [proposition.index(var.doms[0]) for var in variables]
+        self.quantif_axis = [proposition.doms.index(var.doms[0]) for var in variables]
 
     def _compute(self, args):
         vars = args[:-1]
@@ -221,7 +221,7 @@ def Forall(variables, proposition: LogicalComputation):
     # TODO(thadumi) assert variables and proposition type
     # TODO(thadumi) add dock for Forlall functional API
 
-    if type(variables) is not list or type(variables) is not tuple:
+    if type(variables) is not list and type(variables) is not tuple:
         variables = (variables,)
 
     result_doms = [x for x in proposition.doms if x not in [var.doms[0] for var in variables]]
@@ -230,7 +230,7 @@ def Forall(variables, proposition: LogicalComputation):
                                     variables, proposition)
 
 
-def Exist(variables, proposition):
+def Exists(variables, proposition):
     # TODO(thadumi) assert variables and proposition type
     # TODO(thadumi) add dock for Exist functional API
 
