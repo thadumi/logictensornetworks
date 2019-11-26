@@ -6,11 +6,6 @@
 import tensorflow as tf
 
 
-def validate_label(label):
-    if label is None or not isinstance(label, str):
-        raise ValueError('The label of a constant must be defined as a string')
-
-
 # assuming args are just the doms
 # TODO: WARN(thadumi) doms could not be flat
 def cross_args(doms):
