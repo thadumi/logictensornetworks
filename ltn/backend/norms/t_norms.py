@@ -1,3 +1,8 @@
+"""
+:Author: Theodor A. Dumitrescu
+:Date: 26/11/19
+:Version: 0.0.2
+"""
 import tensorflow as tf
 
 '''########################## Min norms ###################################'''
@@ -16,17 +21,13 @@ def min_not(wff):
 
 
 def min_implies(wff1, wff2):
-    leq = tf.cast(wff1 <= wff2, dtype=tf.dtypes.float32)  # should be useless
-    min = tf.math.minimum(wff1, wff2)
-
-    return tf.math.maximum(leq, min)
+    return tf.math.maximum(tf.cast(tf.math.less_equal(wff1, wff2), dtype=tf.dtypes.float32),
+                           wff2)
 
 
 def min_equivalent(wff1, wff2):
-    eq = tf.cast(wff1 == wff2, dtype=tf.dtypes.float32)
-    min = tf.math.minimum(wff1, wff2)
-
-    return tf.math.maximum(eq, min)
+    return tf.math.maximum(tf.cast(tf.math.equal(wff1, wff2), dtype=tf.float32),
+                           tf.math.minimum(wff1, wff2))
 
 
 '''########################## Lukasiewicz norms ###################################'''
@@ -38,7 +39,11 @@ def luk_and(wff):
 
     c = tf.cast(tf.shape(wff)[-1], dtype=tf.dtypes.float32)
 
-    return tf.math.maximum(0.0, tf.math.reduce_sum(wff, axis=-1, keepdims=True) + 1 - c)
+    # return tf.math.maximum(0.0, tf.math.reduce_sum(wff, axis=-1, keepdims=True) + 1 - c)
+    return tf.math.maximum(0.0,
+                           tf.math.reduce_sum(input_tensor=wff, axis=-1, keepdims=True)
+                           + 1
+                           - tf.cast(tf.shape(input=wff)[-1], dtype=tf.float32))
 
 
 def luk_or(wff):
@@ -54,7 +59,7 @@ def luk_implies(wff1, wff2):
 
 
 def luk_equivalent(wff1, wff2):
-    return 1 - abs(wff1 - wff2)
+    return 1 - tf.math.abs(wff1 - wff2)
 
 
 '''########################## Mean norms ###################################'''
@@ -77,7 +82,7 @@ def mean_not(wff):
 
 
 def mean_equivalent(wff1, wff2):
-    return 1 - tf.abs(wff1 - wff2)
+    return 1 - tf.math.abs(wff1 - wff2)
 
 
 '''########################## Prod norms ###################################'''
@@ -92,13 +97,12 @@ def prod_or(wffs):
 
 
 def prod_implies(wff1, wff2):
-    le_wff1_wff2 = tf.cast(wff1 <= wff2, dtype=tf.dtypes.float32)
-    gt_wff1_wff2 = tf.cast(wff1 > wff2, dtype=tf.dtypes.float32)
+    le_wff1_wff2 = tf.cast(tf.math.less_equal(wff1, wff2), dtype=tf.dtypes.float32)
+    gt_wff1_wff2 = tf.cast(tf.math.greater(wff1, wff2), dtype=tf.dtypes.float32)
 
-    if wff1[0] == 0:
-        return le_wff1_wff2 + gt_wff1_wff2 * wff2 / wff1
-    else:
-        return tf.constant([1.0])
+    return tf.cond(pred=tf.math.equal(wff1[0], 0),
+                   true_fn=lambda: le_wff1_wff2 + gt_wff1_wff2 * wff2 / wff1,
+                   false_fn=lambda: tf.constant([1.0]))
 
 
 def prod_not(wff):
