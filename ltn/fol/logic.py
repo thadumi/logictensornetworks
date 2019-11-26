@@ -1,7 +1,7 @@
 """
 :Author: thadumi
-:Date: 25/11/19
-:Version: 0.0.2
+:Date: 26/11/19
+:Version: 0.0.3
 """
 
 import tensorflow as tf
@@ -16,7 +16,10 @@ class LogicalComputation(object):
                  args):
         self._in_doms = in_doms  # TODO(thadumi): this could be removed and computed using _ltn_args
         self._out_doms = out_doms
-        self._ltn_args = args
+        self._ltn_args = args or []
+
+    def args(self):
+        return [arg.tensor for arg in self._ltn_args]
 
     @property
     def doms(self):
@@ -25,11 +28,15 @@ class LogicalComputation(object):
     @property
     def tensor(self) -> tf.Tensor:
         # call the definition aka definition(*[arg.tensor() for arg in args])
-        pass
+        # raise Exception(self.__class__.__name__ + ' needs to define the tensor method')
+        return self._compute(self.args())
 
     @property
     def numpy(self):
         return self.tensor.numpy()
+
+    def _compute(self, args):
+        raise Exception(self.__class__.__name__ + ' needs to define the _compute method')
 
     def and_(self, other):
         return self.__and__(other)
@@ -66,6 +73,11 @@ class LogicalComputation(object):
         # WARN overriding __eq__ could cause issues on dictionaries
         eX_doms, _, _, tensor_cross_2args = cross_2args(x_ltn_doms=self.doms, y_ltn_doms=other.doms)
         return EquivalenceLogicalComputation(in_doms=[self.doms, other.doms], out_doms=eX_doms, args=[self, other])
+
+    def __hash__(self):
+        # needed by tf.function for hashing the self argument in logical predicate name
+        # WARN maybe should be considered a better hash value (?)
+        return hash(str(self))
 
 
 # TODO(thadumi): AND should be a monadic type and return itself during an AND operation
