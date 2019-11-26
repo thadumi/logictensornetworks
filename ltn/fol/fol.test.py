@@ -114,3 +114,4 @@ print("Forall x: smokes(x) -> forall y: friend(x,y) -> smokes(y))",
       (Forall(p, Implies(Smokes(p),
                          Forall(q, Implies(Friends(p, q),
                                            Smokes(q)))))).numpy)
+print(Forall(p, Smokes(p) >> Forall(q, Friends(p, q) >> Smokes(q))).numpy)
