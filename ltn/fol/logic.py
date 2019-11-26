@@ -1,7 +1,7 @@
 """
 :Author: thadumi
 :Date: 26/11/19
-:Version: 0.0.3
+:Version: 0.0.4
 """
 
 import tensorflow as tf
@@ -199,6 +199,22 @@ class ExistsLogicalComputation(LogicalComputation):
 
 def Not(lc: LogicalComputation) -> LogicalComputation:
     return lc.not_()
+
+
+def And(arg1: LogicalComputation, arg2: LogicalComputation) -> LogicalComputation:
+    return arg1.and_(arg2)
+
+
+def Or(arg1: LogicalComputation, arg2: LogicalComputation) -> LogicalComputation:
+    return arg1.or_(arg2)
+
+
+def Implies(arg1, arg2):
+    return arg1 >> arg2
+
+
+def Equiv(arg1, arg2):
+    return arg1 == arg2
 
 
 def Forall(variables, proposition: LogicalComputation):
