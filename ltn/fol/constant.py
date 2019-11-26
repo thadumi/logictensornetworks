@@ -30,21 +30,12 @@ class LogicalConstant(LogicalComputation):
             else:
                 self._tf_tensor = FOL.variable(tf.random.uniform(shape=(1, len(self.min_value)),
                                                                  minval=self.min_value,
-                                                                 maxval=self.max_value))
+                                                                 maxval=self.max_value,
+                                                                 seed=42))
         return self._tf_tensor
 
     def __str__(self):
         return self.name
-
-
-'''
-    def _update_definition(self, definition):
-        if tf.is_tensor(definition):
-            tensor = definition
-            definition = lambda *args: tensor
-
-        self._definition = definition
-'''
 
 
 def constant(name: str,
@@ -93,9 +84,3 @@ def constant(name: str,
 
     FOL.track_constant(name, logical_constant)
     return logical_constant
-
-
-def _default_constant_definition(min_value=None, max_value=None):
-    return tf.random.uniform(shape=(1, len(min_value)),
-                             minval=min_value,
-                             maxval=max_value)

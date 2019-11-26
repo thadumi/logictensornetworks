@@ -64,14 +64,13 @@ def tell(lc):
 
 def ask(lc):
     # TODO(thadumi)
-    pass
+    return lc.tensor
 
 
 def train(max_epochs=10000,
           track_sat_levels=100,
           sat_level_epsilon=.99,
           optimizer=None):
-
     @tf.function
     def axioms_aggregator(axioms):
         return tf.reduce_mean(tf.concat(axioms, axis=0))
@@ -82,11 +81,16 @@ def train(max_epochs=10000,
         return axioms_aggregator(axioms)
 
     def loss(x):
-        return - (1.0 / x)
+        return 1.0 - x
 
-    optimizer = tf.keras.optimizers.RMSprop(learning_rate=.01, decay=.9)
+    optimizer = tf.keras.optimizers.RMSprop(learning_rate=.1, decay=.9)
 
+    # TODO(thadumi) processing gradients before applying them for tracking the loss history
     for step in range(max_epochs):
-        # loss_step = loss(theory())
+        loss_step = loss(theory())
+        print(loss_step.numpy())
+
         optimizer.minimize(lambda: loss(theory()), var_list=lambda: _TF_VARIABLES)
 
+        if step % 100 == 0:
+            print(step / max_epochs * 100)
