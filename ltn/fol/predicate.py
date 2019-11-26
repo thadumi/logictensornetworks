@@ -1,7 +1,7 @@
 """
 :Author: thadumi
 :Date: 26/11/19
-:Version: 0.0.3
+:Version: 0.0.4
 """
 
 import logging
@@ -33,13 +33,13 @@ class LogicalPredicate(LogicalComputation):
 
     def _reshape(self, result, crossed_args):
         if self._out_doms:
-            return tf.reshape(result, (1,))
-        else:
             return tf.reshape(result,
                               tf.concat([tf.shape(crossed_args)[:-1], [1]], axis=0))
+        else:
+            return tf.reshape(result, (1,))
 
     def __str__(self):
-        return self.predicate.name + '(' + ', '.join([str(i) for i in self.input_terms]) + ')'
+        return self.predicate.name + '(' + ', '.join([str(i) for i in self._ltn_args]) + ')'
 
 
 class Predicate(object):
