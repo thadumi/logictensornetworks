@@ -1,18 +1,15 @@
 """
 :Date: Nov 26, 2019
-:Version: 0.0.2
+:Version: 0.0.3
 """
-from typing import List, Dict, Any
+from typing import List, Any
 
 import tensorflow as tf
-
 
 CONSTANTS = {}
 PREDICATES = {}
 VARIABLES = {}  # TODO(thadumi)
 FUNCTIONS = {}  # NOTE(thadumi): useless a function is a predicate with one arg
-TERMS = {}  # NOTE(thadumi): useless
-FORMULAS = {}  # NOTE(thadumi): useless
 
 # TODO(thadumi) define an hash method for LogicalComputation for checking that there are no others axiom
 # already defined
@@ -60,6 +57,36 @@ def variable(initial_value, **kwargs):
     return var
 
 
-def axiom(lc):
+def tell(lc):
     # TODO(thadumi): an axiom can't be a constant or a variable. Add checks
     AXIOMS.append(lc)
+
+
+def ask(lc):
+    # TODO(thadumi)
+    pass
+
+
+def train(max_epochs=10000,
+          track_sat_levels=100,
+          sat_level_epsilon=.99,
+          optimizer=None):
+
+    @tf.function
+    def axioms_aggregator(axioms):
+        return tf.reduce_mean(tf.concat(axioms, axis=0))
+
+    # @tf.function
+    def theory():
+        axioms = [axiom.tensor for axiom in AXIOMS]
+        return axioms_aggregator(axioms)
+
+    def loss(x):
+        return - (1.0 / x)
+
+    optimizer = tf.keras.optimizers.RMSprop(learning_rate=.01, decay=.9)
+
+    for step in range(max_epochs):
+        # loss_step = loss(theory())
+        optimizer.minimize(lambda: loss(theory()), var_list=lambda: _TF_VARIABLES)
+
