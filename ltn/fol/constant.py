@@ -1,7 +1,7 @@
 """
 :Author: thadumi
-:Date: 25/11/19
-:Version: 0.0.2
+:Date: 26/11/19
+:Version: 0.0.3
 """
 
 import logging
@@ -17,7 +17,21 @@ class LogicalConstant(LogicalComputation):
     def __init__(self, **kwargs):
         super(LogicalConstant, self).__init__(None, [], [])
         self.name = kwargs['name']
-        self._definition = None
+        self.max_value = kwargs['max_value']
+        self.min_value = kwargs['min_value']
+        self.value = kwargs['value']
+
+        self._tf_tensor = None
+
+    def _compute(self, args):
+        if self._tf_tensor is None:  # for lazy initialization of a constant
+            if self.value is not None:
+                self._tf_tensor = tf.constant(self.value)
+            else:
+                self._tf_tensor = FOL.variable(tf.random.uniform(shape=(1, len(self.min_value)),
+                                                                 minval=self.min_value,
+                                                                 maxval=self.max_value))
+        return self._tf_tensor
 
     def __str__(self):
         return self.name
