@@ -1,6 +1,6 @@
 """
-:Date: Nov 16, 2019
-:Version: 0.0.1
+:Date: Nov 26, 2019
+:Version: 0.0.2
 """
 from typing import List, Dict, Any
 
@@ -53,8 +53,8 @@ def variable_already_defined(name: str) -> bool:
     return name in VARIABLES.keys()
 
 
-def variable(inital_value):
-    var = tf.Variable(inital_value)
+def variable(initial_value, **kwargs):
+    var = tf.Variable(initial_value, **kwargs)
     _TF_VARIABLES.append(var)
 
     return var
