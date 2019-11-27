@@ -20,17 +20,18 @@ class LogicalPredicate(LogicalComputation):
                  input_doms=None,
                  output_doms=None,
                  input_terms=None,
-                 computation=None):
+                 tensor_cross_args=None):
         super(LogicalPredicate, self).__init__(input_doms, output_doms, input_terms)
         self.predicate = predicate
-        self.computation = computation
+        self.tensor_cross_args = tensor_cross_args
 
     @tf.function
     def _compute(self, args):
-        crossed_args, list_of_args_in_crossed_args = self.computation(args)
-        result = self.predicate.predicate_definition(*list_of_args_in_crossed_args)
+        crossed_args, list_of_args_in_crossed_args = self.tensor_cross_args(args)
+        result = self.predicate.predicate_definition(list_of_args_in_crossed_args)
         return self._reshape(result, crossed_args)
 
+    @tf.function
     def _reshape(self, result, crossed_args):
         if self._out_doms:
             return tf.reshape(result,
@@ -112,13 +113,13 @@ class DefaultPredicateModel(object):
         self.u = FOL.variable(tf.ones([4, 1]))
 
     @tf.function
-    def __call__(self, *args) -> tf.Tensor:
+    def __call__(self, args) -> tf.Tensor:
         W = tf.linalg.band_part(self.w, 0, -1)
         tensor_args = tf.concat(args, axis=1)
         X = tf.concat([tf.ones((tf.shape(tensor_args)[0], 1)),
                        tensor_args], 1)
-        XW = tf.matmul(tf.tile(tf.expand_dims(X, 0), [4, 1, 1]), W)
-        XWX = tf.squeeze(tf.matmul(tf.expand_dims(X, 1), tf.transpose(XW, [1, 2, 0])), axis=[1])
-        gX = tf.matmul(tf.tanh(XWX), self.u)
-        result = tf.sigmoid(gX)
+        XW = tf.linalg.matmul(tf.tile(tf.expand_dims(X, 0), [4, 1, 1]), W)
+        XWX = tf.squeeze(tf.linalg.matmul(tf.expand_dims(X, 1), tf.transpose(XW, [1, 2, 0])), axis=[1])
+        gX = tf.linalg.matmul(tf.math.tanh(XWX), self.u)
+        result = tf.math.sigmoid(gX)
         return result

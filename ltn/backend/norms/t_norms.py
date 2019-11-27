@@ -34,11 +34,6 @@ def min_equivalent(wff1, wff2):
 
 
 def luk_and(wff):
-    a = tf.math.reduce_sum(wff, axis=-1, keepdims=True)
-    b = tf.cast(tf.shape(wff)[-1], dtype=tf.dtypes.float32)
-
-    c = tf.cast(tf.shape(wff)[-1], dtype=tf.dtypes.float32)
-
     # return tf.math.maximum(0.0, tf.math.reduce_sum(wff, axis=-1, keepdims=True) + 1 - c)
     return tf.math.maximum(0.0,
                            tf.math.reduce_sum(input_tensor=wff, axis=-1, keepdims=True)

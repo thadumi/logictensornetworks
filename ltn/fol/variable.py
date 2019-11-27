@@ -32,7 +32,7 @@ class LogicalVariable(LogicalComputation):
 
     @tf.function
     def _compute(self, args):
-        if self.closed_world: # TODO(thadumi): could create two subclass VariableClosedWord and StaticVariable
+        if self.closed_world:  # TODO(thadumi): could create two subclass VariableClosedWord and StaticVariable
             return tf.concat(args, axis=0)
         else:
             return tf.identity(self.value)

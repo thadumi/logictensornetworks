@@ -20,21 +20,20 @@ class LogicalComputation(object):
         self._ltn_args = args or []
 
     def args(self):
-        return [arg.tensor for arg in self._ltn_args]
+        return [arg.tensor() for arg in self._ltn_args]
 
     @property
     def doms(self):
         return self._out_doms
 
-    @property
+    # @property
     def tensor(self) -> tf.Tensor:
         # call the definition aka definition(*[arg.tensor() for arg in args])
         # raise Exception(self.__class__.__name__ + ' needs to define the tensor method')
         return self._compute(self.args())
 
-    @property
     def numpy(self):
-        return self.tensor.numpy()
+        return self.tensor().numpy()
 
     def _compute(self, args):
         raise Exception(self.__class__.__name__ + ' needs to define the _compute method')

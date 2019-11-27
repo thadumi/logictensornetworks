@@ -2,6 +2,7 @@
 :Date: Nov 26, 2019
 :Version: 0.0.3
 """
+import datetime
 from typing import List, Any
 
 import tensorflow as tf
@@ -64,31 +65,40 @@ def tell(lc):
 
 def ask(lc):
     # TODO(thadumi)
-    return lc.tensor
+    return lc.tensor()
 
 
 def train(max_epochs=10000,
           track_sat_levels=100,
           sat_level_epsilon=.99,
           optimizer=None):
+
     @tf.function
     def axioms_aggregator(axioms):
         return tf.reduce_mean(tf.concat(axioms, axis=0))
 
-    # @tf.function
+    @tf.function
     def theory():
-        axioms = [axiom.tensor for axiom in AXIOMS]
+        axioms = []
+        for axiom in AXIOMS:
+            axioms.append(axiom.tensor())
         return axioms_aggregator(axioms)
 
+    @tf.function
     def loss(x):
         return 1.0 - x
 
     optimizer = tf.keras.optimizers.RMSprop(learning_rate=.1, decay=.9)
+    current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    train_log_dir = '/tmp/logs/gradient_tape/' + current_time + '/train'
+    train_summary_writer = tf.summary.create_file_writer(train_log_dir)
 
     # TODO(thadumi) processing gradients before applying them for tracking the loss history
     for step in range(max_epochs):
         loss_step = loss(theory())
         print(loss_step.numpy())
+        with train_summary_writer.as_default():
+            tf.summary.scalar('loss', loss_step, step=step)
 
         optimizer.minimize(lambda: loss(theory()), var_list=lambda: _TF_VARIABLES)
 

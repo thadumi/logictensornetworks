@@ -66,7 +66,7 @@ FOL.tell(Equiv(Forall(p1, Implies(Smokes(p1), Cancer(p1))),
 FOL.tell(Equiv(Forall(p1, Implies(Cancer(p1), Smokes(p1))),
                Forall(p2, Implies(Cancer(p2), Smokes(p2)))))
 
-FOL.train(max_epochs=500)
+FOL.train(max_epochs=1000)
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -88,10 +88,10 @@ pd.options.display.float_format = '{:,.2f}'.format
 
 pd.set_option('precision', 2)
 
-df_smokes_cancer = pd.DataFrame(tf.concat([Smokes(p).tensor, Cancer(p).tensor], axis=1).numpy(),
+df_smokes_cancer = pd.DataFrame(tf.concat([Smokes(p).tensor(), Cancer(p).tensor()], axis=1).numpy(),
                                 columns=["Smokes", "Cancer"],
                                 index=list('abcdefghijklmn'))
-pred_friends = tf.squeeze(Friends(p, q).tensor).numpy()
+pred_friends = tf.squeeze(Friends(p, q).tensor()).numpy()
 df_friends_ah = pd.DataFrame(pred_friends[:8, :8],
                              index=list('abcdefgh'),
                              columns=list('abcdefgh'))
@@ -108,17 +108,17 @@ plt_heatmap(df_friends_in)
 plt.show()
 
 print("forall x ~Friends(x,x)",
-      (Forall(p, Not(Friends(p, p)))).numpy)
+      (Forall(p, Not(Friends(p, p)))).numpy())
 print("Forall x Smokes(x) -> Cancer(x)",
-      (Forall(p, Implies(Smokes(p), Cancer(p)))).numpy)
+      (Forall(p, Implies(Smokes(p), Cancer(p)))).numpy())
 print("forall x y Friends(x,y) -> Friends(y,x)",
-      (Forall((p, q), Implies(Friends(p, q), Friends(q, p)))).numpy)
+      (Forall((p, q), Implies(Friends(p, q), Friends(q, p)))).numpy())
 print("forall x Exists y (Friends(x,y)",
-      (Forall(p, Exists(q, Friends(p, q)))).numpy)
+      (Forall(p, Exists(q, Friends(p, q)))).numpy())
 print("Forall x,y Friends(x,ay) -> (Smokes(x)->Smokes(y))",
-      (Forall((p, q), Implies(Friends(p, q), Implies(Smokes(p), Smokes(q))))).numpy)
+      (Forall((p, q), Implies(Friends(p, q), Implies(Smokes(p), Smokes(q))))).numpy())
 print("Forall x: smokes(x) -> forall y: friend(x,y) -> smokes(y))",
       (Forall(p, Implies(Smokes(p),
                          Forall(q, Implies(Friends(p, q),
-                                           Smokes(q)))))).numpy)
-print(Forall(p, Smokes(p) >> Forall(q, Friends(p, q) >> Smokes(q))).numpy)
+                                           Smokes(q)))))).numpy())
+print(Forall(p, Smokes(p) >> Forall(q, Friends(p, q) >> Smokes(q))).numpy())

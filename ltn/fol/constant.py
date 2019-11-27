@@ -30,8 +30,7 @@ class LogicalConstant(LogicalComputation):
             else:
                 self._tf_tensor = FOL.variable(tf.random.uniform(shape=(1, len(self.min_value)),
                                                                  minval=self.min_value,
-                                                                 maxval=self.max_value,
-                                                                 seed=42))
+                                                                 maxval=self.max_value))
         return self._tf_tensor
 
     def __str__(self):
