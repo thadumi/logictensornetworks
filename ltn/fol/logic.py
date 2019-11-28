@@ -123,7 +123,7 @@ class NotLogicalComputation(LogicalComputation):
         return F_Not(args[0])
 
     def __str__(self):
-        return '¬' + str(self._ltn_args)
+        return '¬' + str(self._ltn_args[0])
 
 
 class ImpliesLogicalComputation(LogicalComputation):
