@@ -19,9 +19,12 @@ def cross_args(doms):
     @tf.function
     def tensor_cross_args(tensors):
         result_tensor = tensors[0]
+        # tf.print('tensors_cross_args {} {}'.format(len(tensors), len(lambdas)))
+        t = 1
         for i in range(len(lambdas)):
             cross = lambdas[i]
-            result_tensor, _ = cross(result_tensor, tensors[i])
+            result_tensor, _ = cross(result_tensor, tensors[t])
+            t = t + 1
 
         result_flat = tf.reshape(result_tensor,
                                  (tf.math.reduce_prod(tf.shape(result_tensor)[:-1]),
@@ -45,7 +48,6 @@ def cross_2args(x_ltn_doms=None, y_ltn_doms=None):
     X_Y = set(x_ltn_doms) - set(y_ltn_doms)
     Y_X = set(y_ltn_doms) - set(x_ltn_doms)
 
-    number_of_x_expands = 0
     # eX = X
     eX_doms = [x for x in x_ltn_doms]
     for y in Y_X:
