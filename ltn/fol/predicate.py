@@ -1,9 +1,9 @@
 """
 :Author: thadumi
-:Date: 26/11/19
-:Version: 0.0.4
+:Date: Dec 03, 2019
+:Version: 0.0.5
 """
-
+import functools
 import logging
 from typing import Optional, Callable
 
@@ -11,7 +11,7 @@ import tensorflow as tf
 
 import ltn.backend.fol_status as FOL
 from logic import LogicalComputation
-from ltn.backend.ltn_utils import cross_args
+from ltn.backend.ltn_utils import cross_args, split_cross_args, _cross_args
 
 
 class LogicalPredicate(LogicalComputation):
@@ -20,24 +20,13 @@ class LogicalPredicate(LogicalComputation):
                  input_doms=None,
                  output_doms=None,
                  input_terms=None,
-                 tensor_cross_args=None):
+                 predicate_computation=None):
         super(LogicalPredicate, self).__init__(input_doms, output_doms, input_terms)
         self.predicate = predicate
-        self.tensor_cross_args = tensor_cross_args
+        self.predicate_computation = predicate_computation
 
-    @tf.function
-    def _compute(self, args):
-        crossed_args, list_of_args_in_crossed_args = self.tensor_cross_args(args)
-        result = self.predicate.predicate_definition(list_of_args_in_crossed_args)
-        return self._reshape(result, crossed_args)
-
-    @tf.function
-    def _reshape(self, result, crossed_args):
-        if self._out_doms:
-            return tf.reshape(result,
-                              tf.concat([tf.shape(crossed_args)[:-1], [1]], axis=0))
-        else:
-            return tf.reshape(result, (1,))
+    def _compute(self, *args) -> tf.Tensor:
+        return self.predicate_computation(*args)
 
     def __str__(self):
         return self.predicate.name + '(' + ', '.join([str(i) for i in self._ltn_args]) + ')'
@@ -45,21 +34,22 @@ class LogicalPredicate(LogicalComputation):
 
 class Predicate(object):
     def __init__(self, **kwargs):
-        print(kwargs)
+        logging.info('Clearing a new predicate: ' + str(kwargs))
         self.name = kwargs['name']
         self.predicate_definition = kwargs['predicate_definition']
         self.number_of_arguments = kwargs['number_of_arguments']
         self.argument_size = kwargs['argument_size']
 
     def __call__(self, *args: LogicalComputation, **kwargs) -> LogicalPredicate:
-        # Friends(c,v) -> LogicalPredicate which knows the arguments and what should be return
         input_doms = [arg.doms for arg in args]
-        tensor_cross_args, output_doms = cross_args(input_doms)
-
+        output_doms, tensor_cross_args = cross_args(*input_doms)
+        logging.debug(_cross_args.cache_info())
         return LogicalPredicate(self,
                                 input_doms, output_doms,
                                 [*args],
-                                tensor_cross_args)
+                                _predicate_computational(tensor_cross_args,
+                                                         self.predicate_definition,
+                                                         bool(output_doms)))
 
 
 def predicate(name: str,
@@ -113,13 +103,32 @@ class DefaultPredicateModel(object):
         self.u = FOL.variable(tf.ones([4, 1]))
 
     @tf.function
-    def __call__(self, args) -> tf.Tensor:
+    def __call__(self, *args: tf.Tensor) -> tf.Tensor:
         W = tf.linalg.band_part(self.w, 0, -1)
+
         tensor_args = tf.concat(args, axis=1)
-        X = tf.concat([tf.ones((tf.shape(tensor_args)[0], 1)),
-                       tensor_args], 1)
+        X = tf.concat([tf.ones((tf.shape(tensor_args)[0], 1)), tensor_args], 1)
+
         XW = tf.linalg.matmul(tf.tile(tf.expand_dims(X, 0), [4, 1, 1]), W)
-        XWX = tf.squeeze(tf.linalg.matmul(tf.expand_dims(X, 1), tf.transpose(XW, [1, 2, 0])), axis=[1])
+        XWX = tf.squeeze(tf.linalg.matmul(tf.expand_dims(X, 1), tf.transpose(XW, perm=[1, 2, 0])), axis=[1])
         gX = tf.linalg.matmul(tf.math.tanh(XWX), self.u)
         result = tf.math.sigmoid(gX)
         return result
+
+
+
+@functools.lru_cache(maxsize=None)
+def _predicate_computational(tensor_cross_args: Callable,
+                             predicate_definition: Callable,
+                             need_reshape: bool) -> Callable:
+    @tf.function
+    def _computation(*args):
+        crossed_args = tensor_cross_args(*args)
+        result = predicate_definition(*split_cross_args(crossed_args, *args))
+
+        if need_reshape:
+            return tf.reshape(result, tf.concat([tf.shape(input=crossed_args)[:-1], [1]], axis=0))
+        else:
+            return tf.reshape(result, (1,))
+
+    return _computation

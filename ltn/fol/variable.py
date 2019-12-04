@@ -1,7 +1,7 @@
 """
 :Author: Theodor A. Dumitrescu
-:Date: 26/11/19
-:Version: 0.0.2
+:Date: Dec 03, 2019
+:Version: 0.0.3
 """
 
 import logging
@@ -20,7 +20,7 @@ class LogicalVariable(LogicalComputation):
                  name=None,
                  static_value=None,
                  constants=None):
-        super(LogicalVariable, self).__init__(None, [name], [])
+        super(LogicalVariable, self).__init__(None, (name,), ())
         self.name = name
         self.value = static_value
 
@@ -29,13 +29,23 @@ class LogicalVariable(LogicalComputation):
 
         if self.closed_world:
             self._ltn_args = constants
+        else:
+            # static_value arg should have been provided
+            # TODO(thadumi): assert that value is a Tensor
+            self.value = tf.identity(static_value)
+
+    def tensor(self) -> tf.Tensor:
+        if self.closed_world:  # (thadumi): we could create two subclass ClosedWordVariable and StaticVariable
+            return self._compute(*[constant.tensor() for constant in self.constants])
+        else:
+            return self.value
 
     @tf.function
-    def _compute(self, args):
-        if self.closed_world:  # TODO(thadumi): could create two subclass VariableClosedWord and StaticVariable
-            return tf.concat(args, axis=0)
-        else:
-            return tf.identity(self.value)
+    def _compute(self, *args):
+        print('tracking')
+        # logging.debug('tracing for ' + self.name)
+        # only for closed word variables
+        return tf.concat(args, axis=0)
 
     def __str__(self):
         return self.name

@@ -1,8 +1,7 @@
 """
-:Date: Nov 26, 2019
-:Version: 0.0.3
+:Date: Dec 04, 2019
+:Version: 0.0.4
 """
-import datetime
 from typing import List, Any
 
 import tensorflow as tf
@@ -73,34 +72,26 @@ def train(max_epochs=10000,
           sat_level_epsilon=.99,
           optimizer=None):
 
-    @tf.function
-    def axioms_aggregator(axioms):
-        return tf.reduce_mean(tf.concat(axioms, axis=0))
+    def axioms_aggregator(*axioms):
+        return 1 / tf.concat(axioms, axis=0)
 
     @tf.function
     def theory():
-        axioms = []
-        for axiom in AXIOMS:
-            axioms.append(axiom.tensor())
-        return axioms_aggregator(axioms)
+        return axioms_aggregator(*[axiom.tensor() for axiom in AXIOMS])
 
     @tf.function
     def loss(x):
-        return 1.0 - x
+        return 0.0 - (1.0 / tf.math.reduce_mean(x))
 
-    optimizer = tf.keras.optimizers.RMSprop(learning_rate=.1, decay=.9)
-    current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    train_log_dir = '/tmp/logs/gradient_tape/' + current_time + '/train'
-    train_summary_writer = tf.summary.create_file_writer(train_log_dir)
+    optimizer = tf.keras.optimizers.Adam(learning_rate=.01)
 
     # TODO(thadumi) processing gradients before applying them for tracking the loss history
     for step in range(max_epochs):
-        loss_step = loss(theory())
-        print(loss_step.numpy())
-        with train_summary_writer.as_default():
-            tf.summary.scalar('loss', loss_step, step=step)
-
         optimizer.minimize(lambda: loss(theory()), var_list=lambda: _TF_VARIABLES)
 
         if step % 100 == 0:
-            print(step / max_epochs * 100)
+            loss_step = loss(theory())
+            print('Step {:10}\t\tLoss {}'.format(step, loss_step))
+            # print(AXIOMS[0].numpy(), ' ', CONSTANTS['a'].numpy(), ' ', CONSTANTS['b'].numpy())
+            # print(PREDICATES['Friends'].predicate_definition.w)
+            # print(PREDICATES['Friends'].predicate_definition.u)

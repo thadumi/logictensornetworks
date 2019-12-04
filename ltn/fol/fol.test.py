@@ -1,8 +1,9 @@
 """
 :Author: Theodor A. Dumitrescu
-:Date: 26/11/19
-:Version: 0.0.1
+:Date: Dec 03, 2019
+:Version: 0.0.2
 """
+import logging
 
 import ltn.backend.fol_status as FOL
 from constant import constant
@@ -10,7 +11,11 @@ from logic import Forall, Implies, Not, Exists, Equiv
 from predicate import predicate
 from variable import variable
 
-size = 10
+logging.basicConfig(format='[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s',
+                    level=logging.DEBUG)
+
+
+size = 20
 
 friends = [('a', 'b'), ('a', 'e'), ('a', 'f'), ('a', 'g'), ('b', 'c'), ('c', 'd'), ('e', 'f'), ('g', 'h'),
            ('i', 'j'), ('j', 'm'), ('k', 'l'), ('m', 'n')]
@@ -38,35 +43,33 @@ for (x, y) in friends:
 for x in g1:
     for y in g1:
         if (x, y) not in friends and x < y:
-            FOL.tell(Friends(g[x], g[y]).not_())
+            FOL.tell(Not(Friends(g[x], g[y])))
 
 for x in g2:
     for y in g2:
         if (x, y) not in friends and x < y:
-            FOL.tell(Friends(g[x], g[y]).not_())
+            FOL.tell(Not(Friends(g[x], g[y])))
 
 for x in smokes:
     FOL.tell(Smokes(g[x]))
 
 for x in g:
     if x not in smokes:
-        FOL.tell(Smokes(g[x]).not_())
+        FOL.tell(Not(Smokes(g[x])))
 
 for x in cancer:
     FOL.tell(Cancer(g[x]))
 
 for x in g1:
     if x not in cancer:
-        FOL.tell(Cancer(g[x]).not_())
+        FOL.tell(Cancer(g[x]).negated())
 FOL.tell(Forall(p, Not(Friends(p, p))))
 
-FOL.tell(Forall((p, q), Equiv(Friends(p, q), Friends(q, p))))
-FOL.tell(Equiv(Forall(p1, Implies(Smokes(p1), Cancer(p1))),
-               Forall(p2, Implies(Smokes(p2), Cancer(p2)))))
-FOL.tell(Equiv(Forall(p1, Implies(Cancer(p1), Smokes(p1))),
-               Forall(p2, Implies(Cancer(p2), Smokes(p2)))))
+FOL.tell(Forall((p, q), Friends(p, q) == Friends(q, p)))
+FOL.tell(Forall(p1, Smokes(p1) >> Cancer(p1)) == Forall(p2, Smokes(p2) >> Cancer(p2)))
+FOL.tell(Forall(p1, Cancer(p1) >> Smokes(p1)) == Forall(p2, Cancer(p2) >> Smokes(p2)))
 
-FOL.train(max_epochs=1000)
+FOL.train()
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -107,6 +110,7 @@ plt.subplot(133)
 plt_heatmap(df_friends_in)
 plt.show()
 
+'''
 print("forall x ~Friends(x,x)",
       (Forall(p, Not(Friends(p, p)))).numpy())
 print("Forall x Smokes(x) -> Cancer(x)",
@@ -115,10 +119,9 @@ print("forall x y Friends(x,y) -> Friends(y,x)",
       (Forall((p, q), Implies(Friends(p, q), Friends(q, p)))).numpy())
 print("forall x Exists y (Friends(x,y)",
       (Forall(p, Exists(q, Friends(p, q)))).numpy())
-print("Forall x,y Friends(x,ay) -> (Smokes(x)->Smokes(y))",
+print("Forall x,y Friends(x,y) -> (Smokes(x)->Smokes(y))",
       (Forall((p, q), Implies(Friends(p, q), Implies(Smokes(p), Smokes(q))))).numpy())
 print("Forall x: smokes(x) -> forall y: friend(x,y) -> smokes(y))",
       (Forall(p, Implies(Smokes(p),
                          Forall(q, Implies(Friends(p, q),
-                                           Smokes(q)))))).numpy())
-print(Forall(p, Smokes(p) >> Forall(q, Friends(p, q) >> Smokes(q))).numpy())
+                                           Smokes(q)))))).numpy())'''
