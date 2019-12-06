@@ -1,15 +1,15 @@
 """
 :Author: Theodor A. Dumitrescu
-:Date: Dec 03, 2019
-:Version: 0.0.2
+:Date: Dec 06, 2019
+:Version: 0.0.3
 """
 import logging
 
-import ltn.backend.fol_status as FOL
-from constant import constant
-from logic import Forall, Implies, Not, Exists, Equiv
-from predicate import predicate
-from variable import variable
+import ltn.fol.fol_status as FOL
+from ltn.fol.constant import constant
+from ltn.fol.logic import Forall, Not
+from ltn.fol.predicate import predicate
+from ltn.fol.variable import variable
 
 logging.basicConfig(format='[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s',
                     level=logging.DEBUG)

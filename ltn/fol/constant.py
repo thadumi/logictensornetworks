@@ -1,6 +1,6 @@
 """
 :Author: thadumi
-:Date: Dec 03, 2019
+:Date: Dec 06, 2019
 :Version: 0.0.4
 """
 
@@ -9,7 +9,7 @@ from typing import Optional, List
 
 import tensorflow as tf
 
-import ltn.backend.fol_status as FOL
+import ltn.fol.fol_status as FOL
 from ltn.fol.logic import LogicalComputation
 
 
@@ -39,7 +39,8 @@ class LogicalConstant(LogicalComputation):
 
 def constant(name: str,
              value: Optional[tf.Tensor] = None,
-             min_value: Optional[List[float]] = None, max_value: Optional[List[float]] = None,
+             min_value: Optional[List[float]] = None,
+             max_value: Optional[List[float]] = None,
              size: Optional[int] = None) -> LogicalConstant:
     """
     TODO: add description of the constant

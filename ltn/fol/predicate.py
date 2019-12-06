@@ -9,9 +9,9 @@ from typing import Optional, Callable
 
 import tensorflow as tf
 
-import ltn.backend.fol_status as FOL
+import ltn.fol.fol_status as FOL
 from logic import LogicalComputation
-from ltn.backend.ltn_utils import cross_args, split_cross_args, _cross_args
+from ltn.backend.utils import cross_args, split_cross_args, _cross_args
 
 
 class LogicalPredicate(LogicalComputation):

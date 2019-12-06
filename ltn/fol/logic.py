@@ -1,12 +1,13 @@
 """
 :Author: thadumi
-:Date: 26/11/19
+:Date: Dec 06, 2019
 :Version: 0.0.5
 """
+from typing import List
 
 import tensorflow as tf
 
-from ltn.backend.ltn_utils import cross_args, cross_2args, split_cross_2args
+from ltn.backend.utils import cross_args, cross_2args, split_cross_2args
 from ltn.backend.norms import F_And, F_Or, F_Not, F_Implies, F_Equiv, F_Exists, F_ForAll
 
 
@@ -29,10 +30,7 @@ class LogicalComputation(object):
     def doms(self):
         return self._out_doms
 
-    # @property
     def tensor(self) -> tf.Tensor:
-        # call the definition aka definition(*[arg.tensor() for arg in args])
-        # raise Exception(self.__class__.__name__ + ' needs to define the tensor method')
         args = [arg.tensor() for arg in self._ltn_args]
         return self._compute(*args)
 
@@ -40,7 +38,7 @@ class LogicalComputation(object):
         if tf.executing_eagerly():
             return self.tensor().numpy()
         else:
-            raise Exception('Operation not supported in eager mode')
+            raise Exception('Operation not supported only in eager mode')
 
     def _compute(self, *args):
         raise Exception(self.__class__.__name__ + ' needs to define the _compute method')
@@ -105,7 +103,6 @@ class LogicalComputation(object):
 # ie AndLC.and(LC) -> AndLC has a new argument which is LC
 # the same of OR
 # this could be done via __rand__ (the operations are aggregated from lest to right)
-
 class AndLogicalComputation(LogicalComputation):
     def __init__(self, in_doms, out_doms, args, tensor_cross_args):
         super(AndLogicalComputation, self).__init__(in_doms, out_doms, args)
@@ -206,17 +203,17 @@ class ExistsLogicalComputation(LogicalComputation):
         self.proposition = proposition
         self.quantif_axis = [proposition.doms.index(var.doms[0]) for var in variables]
 
+    # @tf.function
     def _compute(self, *args):
-        # TODO(thadumi)
         vars = args[:-1]
         wff = args[-1]
 
-        # not_empty_vars = tf.cast(tf.math.reduce_prod(tf.stack([tf.size(var) for var in vars])),
-        #                         dtype=tf.dtypes.bool)
-        # if not_empty_vars:
-        return F_Exists(self.quantif_axis, wff)
-        # else:
-        #    return tf.ones((1,) * (len(self.doms) + 1))
+        not_empty_vars = tf.cast(tf.math.reduce_prod(tf.stack([tf.size(var) for var in vars])),
+                                 dtype=tf.dtypes.bool)
+        if not_empty_vars:
+            return F_Exists(self.quantif_axis, wff)
+        else:
+            return tf.ones((1,) * (len(self.doms) + 1))
 
     def __str__(self):
         return '∃ ' + ','.join([str(var) for var in self.vars]) + ': ' + str(self.proposition)
@@ -243,11 +240,19 @@ def Equiv(arg1, arg2):
 
 
 def Forall(variables, proposition: LogicalComputation):
-    # TODO(thadumi) assert variables and proposition type
     # TODO(thadumi) add doc for Forall functional API
 
     if type(variables) is not list and type(variables) is not tuple:
         variables = (variables,)
+
+    '''    if isinstance(proposition, LogicalComputation) \
+                and not(isinstance(proposition, LogicalVariable) or isinstance(proposition, LogicalConstant)):
+            raise ValueError('Expected proposition to be a LogicalComputation regardless '
+                             'LogicalVariable and LogicalConstant, but received {}'.format(proposition))
+    
+        if any(filter(lambda type: not isinstance(type, LogicalVariable), variables)):
+            raise ValueError('Founded a non instance of LogicalVariable in {}'.format(variables))
+    '''
 
     result_doms = tuple([x for x in proposition.doms if x not in [var.doms[0] for var in variables]])
 
@@ -256,7 +261,6 @@ def Forall(variables, proposition: LogicalComputation):
 
 
 def Exists(variables, proposition):
-    # TODO(thadumi) assert variables and proposition type
     # TODO(thadumi) add dock for Exist functional API
 
     if type(variables) is not list or type(variables) is not tuple:
