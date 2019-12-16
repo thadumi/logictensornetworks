@@ -1,6 +1,6 @@
 """
-:Date: Dec 04, 2019
-:Version: 0.0.4
+:Date: Dec 16, 2019
+:Version: 0.0.5
 """
 import logging
 import time
@@ -11,7 +11,7 @@ import tensorflow as tf
 CONSTANTS = {}
 PREDICATES = {}
 VARIABLES = {}  # TODO(thadumi)
-FUNCTIONS = {}  # NOTE(thadumi): useless a function is a predicate with one arg
+FUNCTIONS = {}
 
 # TODO(thadumi) define an hash method for LogicalComputation for checking that there are no others axiom already defined
 AXIOMS = []
@@ -41,6 +41,14 @@ def track_predicate(predicate_name, meta):
 
 def predicate_already_defined(name: str) -> bool:
     return name in PREDICATES.keys()
+
+
+def track_function(name, meta):
+    FUNCTIONS[name] = meta
+
+
+def function_already_defined(name: str) -> bool:
+    return name in FUNCTIONS.keys()
 
 
 def track_variable(name: str, meta: Any):
